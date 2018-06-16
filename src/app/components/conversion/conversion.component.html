@@ -1,0 +1,11 @@
+<div>
+  <span *ngFor="let type of types">
+    <input type="radio" name="selectedType" [(ngModel)]="selectedType" value="{{type.value}}" (change)="selectType()"/>
+    <span>{{type.title}}</span>
+  </span>
+</div>
+
+<div>
+  <app-to-xml *ngIf="selectedType == conversionTypes.TO_XML"></app-to-xml>
+  <app-to-json *ngIf="selectedType == conversionTypes.TO_JSON"></app-to-json>
+</div>

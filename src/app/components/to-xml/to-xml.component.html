@@ -1,0 +1,32 @@
+<ol>
+    <li>
+        <span>Select source XML file to update</span>
+        <button (click)="selectOutput()">Browse</button>
+        <span>{{xmlFile}}</span><br>
+        <span>I will synchronize this SCHEMA XML with target JSON file updated by developers</span>
+    </li>
+    <li>
+        <span>Select target JSON file</span>
+        <button (click)="selectInput()">Browse</button>
+        <span>{{jsonFile}}</span><br>
+        <span>I will compare this JSON with SCHEMA XML and define delta for synchronization</span>
+        
+    </li>
+    <li>
+        <span>Select language</span>
+        <select [(ngModel)]="selectedLanguage" (change)="onChangeLanguage()">
+            <option *ngFor="let language of languages" [value]="language">{{language}}</option>
+        </select><br>
+        <span>I will compare strings only on the selected language</span>
+    </li>
+    <li>
+        <span>Select product</span>
+        <select [(ngModel)]="selectedProduct" (change)="onChangeProduct()">
+            <option *ngFor="let product of products" [value]="product">{{product}}</option>
+        </select><br>
+        <span>I will compare strings only for the selected product</span>
+    </li>
+    <li>
+        <button (click)="convertToXML()" [disabled]="!selectedLanguage || !selectedProduct">Synchronize data</button>
+    </li>
+  </ol>

@@ -1,0 +1,26 @@
+<ol>
+    <li>
+        <span>Select source XML file</span>
+        <button (click)="selectInput()">Browse</button>
+        <span>{{xmlFile}}</span><br>
+        <span>I will convert this SCHEMA XML file to JSON file</span>    
+    </li>
+    <li>
+        <span>Select language</span>
+        <select [(ngModel)]="selectedLanguage" (change)="onChangeLanguage()">
+            <option *ngFor="let language of languages" [value]="language">{{language}}</option>
+        </select><br>
+        <span>I will convert strings on the selected language only</span>
+    </li>
+    <li>
+        <span>Select product</span>
+        <select [(ngModel)]="selectedProduct" (change)="onChangeProduct()">
+            <option *ngFor="let product of products" [value]="product">{{product}}</option>
+        </select>
+        <div>I will convert strings of the selected product only</div>
+    </li>
+    <li>
+        <button (click)="convertToJSON()" [disabled]="!selectedLanguage || !selectedProduct">Select target folder &amp; Convert</button>
+    </li>
+</ol>
+
