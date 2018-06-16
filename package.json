@@ -28,11 +28,14 @@
     "e2e": "npm-run-all -p -r pree2e:build pree2e:protractor"
   },
   "dependencies": {
-    "xml2js": "^0.4.19",
-    "xmldom": "^0.1.27",
-    "xpath": "0.0.27",
-    "html-entities": "^1.2.1",
-    "lodash": "^4.17.10"
+    "bootstrap": "4.1.1",
+    "html-entities": "1.2.1",
+    "jquery": "3.3.1",
+    "lodash": "4.17.10",
+    "popper.js": "1.14.3",
+    "xml2js": "0.4.19",
+    "xmldom": "0.1.27",
+    "xpath": "0.0.27"
   },
   "devDependencies": {
     "@angular/cli": "1.7.4",
