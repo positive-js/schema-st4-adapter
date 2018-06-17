@@ -1,5 +1,7 @@
 import { Component, OnInit, NgZone } from '@angular/core';
+
 import { ElectronService } from '../../providers/electron.service';
+
 
 @Component({
     selector: 'app-to-xml',

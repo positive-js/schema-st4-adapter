@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+
 import { ElectronService } from '../../providers/electron.service';
+
 
 enum ConversionType {
     TO_JSON = 'to-json',
@@ -25,8 +27,7 @@ export class ConversionComponent implements OnInit {
         this.selectType(this.types[0].value);
     }
 
-    selectType(type) {
-        this.selectedType = type;
-        this.electronService.ipcRenderer.send('client.select-type', this.selectedType);
+    selectType(selectedType) {
+        this.selectedType = selectedType;
     }
 }

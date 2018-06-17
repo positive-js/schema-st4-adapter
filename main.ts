@@ -1,23 +1,28 @@
 import { app, BrowserWindow, screen, ipcMain, dialog } from 'electron';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
-import * as fs from 'fs';
-import * as xpath from 'xpath';
 import * as xmldom from 'xmldom';
+import * as xpath from 'xpath';
+
 import { runToJSON } from './run-to-json';
 import { runToXML } from './run-to-xml';
 
+
 const dom = xmldom.DOMParser;
 
-let win, serve;
+let win;
+let serve;
 const args = process.argv.slice(1);
-serve = args.some(val => val === '--serve');
+serve = args.some((val) => val === '--serve');
 
+// tslint:disable
 try {
     require('dotenv').config();
 } catch {
     console.log('asar');
 }
+// tslint:enable
 
 function createWindow() {
 
@@ -35,8 +40,10 @@ function createWindow() {
 
     if (serve) {
         require('electron-reload')(__dirname, {
+             // tslint:disable-next-line non-literal-require
             electron: require(`${__dirname}/node_modules/electron`)
         });
+         // tslint:disable-next-line no-http-string
         win.loadURL('http://localhost:4200');
     } else {
         win.loadURL(url.format({
@@ -89,7 +96,8 @@ try {
 function getLanguages(pathToXMLFile) {
     const xml = fs.readFileSync(pathToXMLFile, 'utf8');
     const document = new dom().parseFromString(xml);
-    const select = xpath.useNamespaces({ 'n': "http://www.schema.de/2004/ST4/XmlImportExport/Node" });
+    // tslint:disable-next-line no-http-string
+    const select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
     const languages = select('//n:Data-Variables.XML/n:Value/@n:Aspect', document);
 
     return languages.map((attribute: any) => attribute.value);
@@ -98,18 +106,14 @@ function getLanguages(pathToXMLFile) {
 function getProducts(pathToXMLFile, language) {
     const xml = fs.readFileSync(pathToXMLFile, 'utf8');
     const document = new dom().parseFromString(xml);
-    const select = xpath.useNamespaces({ 'n': "http://www.schema.de/2004/ST4/XmlImportExport/Node" });
-    const products = select(`//n:Data-Variables.XML/n:Value[@n:Aspect="${language}"]/n:Entry/variables/h/e/text()`, document);
+     // tslint:disable-next-line no-http-string
+    const select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
+    const products = select(`//n:Data-Variables.XML/n:Value[@n:Aspect="${language}"]/n:Entry/variables/h/e/text()`,
+        document);
 
     return products.map((text: any) => text.data);
 }
 
-// let options;
-let type;
-
-ipcMain.on('client.select-type', (_event, selectedType) => {
-    type = selectedType;
-});
 
 ipcMain.on('client.select-xml', (event) => {
     const paths = dialog.showOpenDialog(
@@ -122,7 +126,7 @@ ipcMain.on('client.select-xml', (event) => {
                 }
             ],
             properties: [
-                'openFile',
+                'openFile'
             ]
         }
     );
@@ -145,7 +149,7 @@ ipcMain.on('client.select-json', (event) => {
                 }
             ],
             properties: [
-                'openFile',
+                'openFile'
             ]
         }
     );
@@ -164,7 +168,7 @@ ipcMain.on('client.select-language', (event, xmlFile, language) => {
 ipcMain.on('client.convert-to-json', (_event, options) => {
     const paths = dialog.showOpenDialog(
         win,
-        {   
+        {
             properties: [
                 'openDirectory'
             ]
