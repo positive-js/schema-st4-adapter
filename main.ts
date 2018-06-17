@@ -104,7 +104,7 @@ function getProducts(pathToXMLFile, language) {
     return products.map((text: any) => text.data);
 }
 
-let options;
+// let options;
 let type;
 
 ipcMain.on('client.select-type', (_event, selectedType) => {
@@ -112,7 +112,6 @@ ipcMain.on('client.select-type', (_event, selectedType) => {
 });
 
 ipcMain.on('client.select-xml', (event) => {
-    options = {};
     const paths = dialog.showOpenDialog(
         win,
         {
@@ -129,13 +128,7 @@ ipcMain.on('client.select-xml', (event) => {
     );
 
     if (paths && paths.length > 0) {
-        if (type === 'to-json') {
-            options.input = paths[0];
-        } else {
-            options.output = paths[0];
-        }
-
-        const languages = getLanguages(type === 'to-json' ? options.input : options.output);
+        const languages = getLanguages(paths[0]);
         event.sender.send('electron.xml-loaded', paths[0]);
         event.sender.send('electron.languages-loaded', languages);
     }
@@ -158,23 +151,17 @@ ipcMain.on('client.select-json', (event) => {
     );
 
     if (paths && paths.length > 0) {
-        options.input = paths[0];
         event.sender.send('electron.json-loaded', paths[0]);
     }
 });
 
 
-ipcMain.on('client.select-language', (event, language) => {
-    options.languages = [ language ];
-    const products = getProducts(type === 'to-json' ? options.input : options.output, language);
+ipcMain.on('client.select-language', (event, xmlFile, language) => {
+    const products = getProducts(xmlFile, language);
     event.sender.send('electron.products-loaded', products);
 });
 
-ipcMain.on('client.select-product', (event, product) => {
-    options.product = product;
-});
-
-ipcMain.on('client.convert-to-json', (event) => {
+ipcMain.on('client.convert-to-json', (_event, options) => {
     const paths = dialog.showOpenDialog(
         win,
         {   
@@ -207,7 +194,7 @@ ipcMain.on('client.convert-to-json', (event) => {
     }
 });
 
-ipcMain.on('client.convert-from-json', (event) => {
+ipcMain.on('client.convert-from-json', (_event, options) => {
     try {
         runToXML(options);
 

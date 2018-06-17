@@ -33,8 +33,14 @@ export class ToJsonComponent implements OnInit {
         this.electronService.ipcRenderer.on('electron.xml-loaded', (_event, xmlFile) => {
             this.zone.run(() => {
                 this.xmlFile = xmlFile;
+                this.reset();
             });
         });
+    }
+
+    reset() {
+        this.selectedLanguage = null;
+        this.selectedProduct = null;
     }
 
     selectInput() {
@@ -42,14 +48,14 @@ export class ToJsonComponent implements OnInit {
     }
 
     onChangeLanguage() {
-        this.electronService.ipcRenderer.send('client.select-language', this.selectedLanguage);
-    }
-
-    onChangeProduct() {
-        this.electronService.ipcRenderer.send('client.select-product', this.selectedProduct);
+        this.electronService.ipcRenderer.send('client.select-language', this.xmlFile, this.selectedLanguage);
     }
 
     convertToJSON() {
-        this.electronService.ipcRenderer.send('client.convert-to-json');
+        this.electronService.ipcRenderer.send('client.convert-to-json', {
+            input: this.xmlFile,
+            product: this.selectedProduct,
+            languages: [ this.selectedLanguage ]
+        });
     }
 }

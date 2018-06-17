@@ -4,7 +4,7 @@
             <a class="nav-link" 
                href="#" 
                [class.active]="selectedType == type.value"
-               (click)="selectedType=type.value">
+               (click)="selectType(type.value)">
                {{type.title}}
             </a>
         </li>

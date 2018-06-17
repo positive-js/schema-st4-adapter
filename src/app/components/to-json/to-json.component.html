@@ -23,8 +23,7 @@
         <span>Select product</span>
         <select class="form-control" 
                 [(ngModel)]="selectedProduct" 
-                [disabled]="!selectedLanguage"
-                (change)="onChangeProduct()">
+                [disabled]="!selectedLanguage">
             <option *ngFor="let product of products" [value]="product">{{product}}</option>
         </select>
         <p>

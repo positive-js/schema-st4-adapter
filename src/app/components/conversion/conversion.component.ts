@@ -22,10 +22,11 @@ export class ConversionComponent implements OnInit {
     constructor(private electronService: ElectronService) { }
 
     ngOnInit() {
-        this.selectType();
+        this.selectType(this.types[0].value);
     }
 
-    selectType() {
+    selectType(type) {
+        this.selectedType = type;
         this.electronService.ipcRenderer.send('client.select-type', this.selectedType);
     }
 }

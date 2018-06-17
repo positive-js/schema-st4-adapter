@@ -34,6 +34,7 @@ export class ToXmlComponent implements OnInit {
         this.electronService.ipcRenderer.on('electron.xml-loaded', (_event, xmlFile) => {
             this.zone.run(() => {
                 this.xmlFile = xmlFile;
+                this.reset();
             });
         });
 
@@ -42,6 +43,11 @@ export class ToXmlComponent implements OnInit {
                 this.jsonFile = jsonFile;
             });
         });
+    }
+
+    reset() {
+        this.selectedLanguage = null;
+        this.selectedProduct = null;
     }
 
     selectInput() {
@@ -53,14 +59,15 @@ export class ToXmlComponent implements OnInit {
     }
 
     onChangeLanguage() {
-        this.electronService.ipcRenderer.send('client.select-language', this.selectedLanguage);
-    }
-
-    onChangeProduct() {
-        this.electronService.ipcRenderer.send('client.select-product', this.selectedProduct);
+        this.electronService.ipcRenderer.send('client.select-language', this.xmlFile, this.selectedLanguage);
     }
 
     convertToXML() {
-        this.electronService.ipcRenderer.send('client.convert-from-json');
+        this.electronService.ipcRenderer.send('client.convert-from-json', {
+            input: this.jsonFile,
+            output: this.xmlFile,
+            languages: [ this.selectedLanguage ],
+            product: this.selectedProduct
+        });
     }
 }
