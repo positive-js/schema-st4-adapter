@@ -1,5 +1,6 @@
 {
   "productName": "schema-st4-adapter",
+  "artifactName": "${name}.${ext}",
   "directories": {
     "output": "app-builds"
   },
