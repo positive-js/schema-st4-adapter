@@ -13,7 +13,6 @@ var VARIABLE_FOLDER_TAG = 'n:VariableFolder';
 var VARIABLE_NODE_TAG = 'n:VariableNode';
 var DATA_VARIABLES_XML_TAG = 'n:Data-Variables.XML';
 var DATA_VARIABLES_LAYOUT_TAG = 'n:Data-Variables.Layout';
-var DATA_VARIABLES_TRANS_CHECKOUT_TAG = 'n:Data-Variables.trans.CheckOut';
 var VALUE_TAG = 'n:Value';
 var ENTRY_TAG = 'n:Entry';
 var HEADER_TAG = 'h';
@@ -21,14 +20,14 @@ var TERM_TAG = 't';
 var ELEMENT_TAG = 'e';
 var ROW_TAG = 'r';
 function validation(options) {
-    if (!options.input || !options.output) {
-        throw new Error('Path to input JSON file or output XML file are not defined');
+    if (!options.targetFile || !options.sourceFile) {
+        throw new Error('Path to source file or target file are not defined');
     }
     if (!options.product) {
         throw new Error('Product is not defined');
     }
-    if (!options.languages) {
-        throw new Error('Languages is not defined');
+    if (!options.language) {
+        throw new Error('Language is not defined');
     }
 }
 function getLastVariableFolder(folder) {
@@ -51,14 +50,15 @@ function getRowByKey(rows, key) {
     });
 }
 function getLastRowId(rows) {
-    return _.max(_.map(rows, function (row) { return _.parseInt(row[KEY_ATTRIBUTES].id, 10); }));
+    var baseDecimal = 10;
+    return _.max(_.map(rows, function (row) { return _.parseInt(row[KEY_ATTRIBUTES].id, baseDecimal); }));
 }
 var runToXML = function (options) {
     validation(options);
-    var json = fs.readFileSync(options.input, 'utf8');
+    var json = fs.readFileSync(options.targetFile, 'utf8');
     var dataJSON = JSON.parse(json);
     var parser = new xml2js.Parser();
-    var xml = fs.readFileSync(options.output);
+    var xml = fs.readFileSync(options.sourceFile);
     parser.parseString(xml, function (err, data) {
         if (err) {
             throw err;
@@ -68,10 +68,9 @@ var runToXML = function (options) {
         var variableNode = lastVariableFolder[0][VARIABLE_NODE_TAG];
         var dataVariablesXML = variableNode[0][DATA_VARIABLES_XML_TAG];
         var dataVariablesLayout = variableNode[0][DATA_VARIABLES_LAYOUT_TAG];
-        var dataVariableCheckout = variableNode[0][DATA_VARIABLES_TRANS_CHECKOUT_TAG];
         var values = dataVariablesXML[0][VALUE_TAG];
         var selectedLanguage = _.find(values, function (value) {
-            return value[KEY_ATTRIBUTES][ASPECT_ATTR] === options.languages[0];
+            return value[KEY_ATTRIBUTES][ASPECT_ATTR] === options.language;
         });
         var variables = selectedLanguage[ENTRY_TAG][0].variables;
         var products = variables[0][HEADER_TAG];
@@ -86,41 +85,41 @@ var runToXML = function (options) {
         });
         var maxRowId = getLastRowId(rows);
         // changing existing and adding new
-        for (var _i = 0, _a = _.keys(dataJSON); _i < _a.length; _i++) {
-            var key = _a[_i];
+        for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+            var key = keys_1[_i];
             var row = getRowByKey(rows, key);
             if (row) {
                 row[ELEMENT_TAG][indexSelectedProduct][KEY_VALUE] = dataJSON[key];
             }
             else {
                 // add new translation key to rows
-                var newRow = (_b = {},
-                    _b[KEY_ATTRIBUTES] = {
+                var newRow = (_a = {},
+                    _a[KEY_ATTRIBUTES] = {
                         id: ++maxRowId
                     },
-                    _b[TERM_TAG] = [(_c = {},
-                            _c[KEY_VALUE] = key,
-                            _c)],
-                    _b[ELEMENT_TAG] = _.fill(Array(products.length), {}),
-                    _b);
+                    _a[TERM_TAG] = [(_b = {},
+                            _b[KEY_VALUE] = key,
+                            _b)],
+                    _a[ELEMENT_TAG] = _.fill(Array(products.length), {}),
+                    _a);
                 newRow[ELEMENT_TAG][indexSelectedProduct][KEY_VALUE] = dataJSON[key];
                 rows.push(newRow);
                 // add to layout
                 var entryLayout = dataVariablesLayout[0][ENTRY_TAG];
                 var rowsInfo = entryLayout[0].variablesLayout[0].rowInfo[0].row;
-                var newRowInfo = (_d = {},
-                    _d[KEY_ATTRIBUTES] = {
+                var newRowInfo = (_c = {},
+                    _c[KEY_ATTRIBUTES] = {
                         id: maxRowId
                     },
-                    _d);
+                    _c);
                 rowsInfo.push(newRowInfo);
             }
         }
         variables[0][ROW_TAG] = rows;
         var builder = new xml2js.Builder();
         var newXML = builder.buildObject(data);
-        fs.writeFileSync(options.output, newXML);
-        var _b, _c, _d;
+        fs.writeFileSync(options.sourceFile, newXML);
+        var _a, _b, _c;
     });
 };
 exports.runToXML = runToXML;

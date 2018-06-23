@@ -1,14 +1,56 @@
 <div class="container-fluid">
-    <ul class="nav nav-tabs">
-        <li class="nav-item" *ngFor="let type of types">
-            <a class="nav-link" 
-               href="#" 
-               [class.active]="selectedType == type.value"
-               (click)="selectType(type.value)">
-               {{type.title}}
-            </a>
+    <ol>
+        <li>
+            <span>Select source file</span>
+            <button class="btn btn-light" (click)="selectSourceFile()">Browse</button>
+            <strong>{{ sourceFile }}</strong>
+            <br>
+            <p>
+                <em></em>
+            </p>
         </li>
-    </ul>
-    <app-to-xml [hidden]="selectedType !== conversionTypes.TO_XML"></app-to-xml>
-    <app-to-json [hidden]="selectedType !== conversionTypes.TO_JSON"></app-to-json>
+        <li>
+            <span>Select target file</span>
+            <button class="btn btn-light" (click)="selectTargetFile()">Browse</button>
+            <span>{{ targetFile }}</span>
+            <p>
+                <em></em>
+            </p>
+        </li>
+        <li>
+            <span>Select language</span>
+            <select class="form-control"
+                    [(ngModel)]="selectedLanguage"
+                    [disabled]="!sourceFile || !targetFile"
+                    (change)="onChangeLanguage()">
+                <option *ngFor="let language of languages" [value]="language">{{language}}</option>
+            </select>
+            <p>
+                <em>I will compare strings only on the selected language</em>
+            </p>
+        </li>
+        <li>
+            <span>Select product</span>
+            <select class="form-control"
+                    [(ngModel)]="selectedProduct"
+                    [disabled]="!selectedLanguage">
+                <option *ngFor="let product of products" [value]="product">{{product}}</option>
+            </select>
+            <p>
+                <em>I will compare strings only for the selected product</em>
+            </p>
+        </li>
+        <li>
+            <button class="btn btn-dark"
+                    (click)="unload()"
+                    [disabled]="!selectedLanguage || !selectedProduct">
+                Unload
+            </button>
+            <button class="btn btn-dark"
+                    (click)="synchronize()"
+                    [disabled]="!selectedLanguage || !selectedProduct">
+                Synchronize
+            </button>
+        </li>
+    </ol>
 </div>

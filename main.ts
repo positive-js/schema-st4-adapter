@@ -1,15 +1,9 @@
-import { app, BrowserWindow, screen, ipcMain, dialog } from 'electron';
-import * as fs from 'fs';
+import { app, BrowserWindow, screen } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
-import * as xmldom from 'xmldom';
-import * as xpath from 'xpath';
 
-import { runToJSON } from './run-to-json';
-import { runToXML } from './run-to-xml';
+import { registerWorkflow } from './workflow';
 
-
-const dom = xmldom.DOMParser;
 
 let win;
 let serve;
@@ -53,6 +47,8 @@ function createWindow() {
         }));
     }
 
+    registerWorkflow(win);
+
     // win.webContents.openDevTools();
 
     // Emitted when the window is closed.
@@ -93,127 +89,3 @@ try {
     // throw e;
 }
 
-function getLanguages(pathToXMLFile) {
-    const xml = fs.readFileSync(pathToXMLFile, 'utf8');
-    const document = new dom().parseFromString(xml);
-    // tslint:disable-next-line no-http-string
-    const select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
-    const languages = select('//n:Data-Variables.XML/n:Value/@n:Aspect', document);
-
-    return languages.map((attribute: any) => attribute.value);
-}
-
-function getProducts(pathToXMLFile, language) {
-    const xml = fs.readFileSync(pathToXMLFile, 'utf8');
-    const document = new dom().parseFromString(xml);
-     // tslint:disable-next-line no-http-string
-    const select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
-    const products = select(`//n:Data-Variables.XML/n:Value[@n:Aspect="${language}"]/n:Entry/variables/h/e/text()`,
-        document);
-
-    return products.map((text: any) => text.data);
-}
-
-
-ipcMain.on('client.select-xml', (event) => {
-    const paths = dialog.showOpenDialog(
-        win,
-        {
-            filters: [
-                {
-                    name: 'Экспортированные XML файлы',
-                    extensions: ['xml']
-                }
-            ],
-            properties: [
-                'openFile'
-            ]
-        }
-    );
-
-    if (paths && paths.length > 0) {
-        const languages = getLanguages(paths[0]);
-        event.sender.send('electron.xml-loaded', paths[0]);
-        event.sender.send('electron.languages-loaded', languages);
-    }
-});
-
-ipcMain.on('client.select-json', (event) => {
-    const paths = dialog.showOpenDialog(
-        win,
-        {
-            filters: [
-                {
-                    name: 'JSON файлы',
-                    extensions: ['json']
-                }
-            ],
-            properties: [
-                'openFile'
-            ]
-        }
-    );
-
-    if (paths && paths.length > 0) {
-        event.sender.send('electron.json-loaded', paths[0]);
-    }
-});
-
-
-ipcMain.on('client.select-language', (event, xmlFile, language) => {
-    const products = getProducts(xmlFile, language);
-    event.sender.send('electron.products-loaded', products);
-});
-
-ipcMain.on('client.convert-to-json', (_event, options) => {
-    const paths = dialog.showOpenDialog(
-        win,
-        {
-            properties: [
-                'openDirectory'
-            ]
-        }
-    );
-
-    if (paths && paths.length > 0) {
-        options.output = paths[0];
-
-        try {
-            runToJSON(options);
-
-            dialog.showMessageBox(win, {
-                type: 'info',
-                title: 'Success',
-                message: 'The file was successfully converted!',
-                buttons: ['OK']
-            });
-        } catch (e) {
-            dialog.showMessageBox(win, {
-                type: 'error',
-                title: 'Error',
-                message: `An error occurred while converting the file: ${e.message}`,
-                buttons: ['Close']
-            });
-        }
-    }
-});
-
-ipcMain.on('client.convert-from-json', (_event, options) => {
-    try {
-        runToXML(options);
-
-        dialog.showMessageBox(win, {
-            type: 'info',
-            title: 'Success',
-            message: 'The file was successfully converted!',
-            buttons: ['OK']
-        });
-    } catch (e) {
-        dialog.showMessageBox(win, {
-            type: 'error',
-            title: 'Error',
-            message: `An error occurred while converting the file: ${e.message}`,
-            buttons: ['Close']
-        });
-    }
-});

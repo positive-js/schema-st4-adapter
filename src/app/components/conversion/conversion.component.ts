@@ -1,12 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 
 import { ElectronService } from '../../providers/electron.service';
 
-
-enum ConversionType {
-    TO_JSON = 'to-json',
-    TO_XML = 'to-xml'
-}
 
 @Component({
     selector: 'app-conversion',
@@ -14,20 +9,75 @@ enum ConversionType {
     styleUrls: ['./conversion.component.scss']
 })
 export class ConversionComponent implements OnInit {
-    conversionTypes: any = ConversionType;
-    types: any[] = [
-        { title: 'To JSON', value: ConversionType.TO_JSON },
-        { title: 'To XML', value: ConversionType.TO_XML }
-    ];
-    selectedType: ConversionType = ConversionType.TO_JSON;
+    sourceFile: string;
+    targetFile: string;
+    languages: string[];
+    selectedLanguage: string;
+    products: string[];
+    selectedProduct: string;
 
-    constructor(private electronService: ElectronService) { }
+    constructor(private electronService: ElectronService, private zone: NgZone) { }
 
     ngOnInit() {
-        this.selectType(this.types[0].value);
+        this.electronService.ipcRenderer.on('electron.languages-loaded', (_event, languages) => {
+            this.zone.run(() => {
+                this.languages = languages;
+            });
+        });
+
+        this.electronService.ipcRenderer.on('electron.products-loaded', (_event, products) => {
+            this.zone.run(() => {
+                this.products = products;
+            });
+        });
+
+        this.electronService.ipcRenderer.on('electron.source-loaded', (_event, sourceFile) => {
+            this.zone.run(() => {
+                this.sourceFile = sourceFile;
+                this.reset();
+            });
+        });
+
+        this.electronService.ipcRenderer.on('electron.target-loaded', (_event, targetFile) => {
+            this.zone.run(() => {
+                this.targetFile = targetFile;
+            });
+        });
     }
 
-    selectType(selectedType) {
-        this.selectedType = selectedType;
+    selectSourceFile() {
+        this.electronService.ipcRenderer.send('client.select-source');
     }
+
+    selectTargetFile() {
+        this.electronService.ipcRenderer.send('client.select-target');
+    }
+
+    onChangeLanguage() {
+        this.electronService.ipcRenderer.send('client.select-language', this.sourceFile, this.selectedLanguage);
+    }
+
+    unload() {
+        this.electronService.ipcRenderer.send('client.unload', {
+            targetFile: this.targetFile,
+            sourceFile: this.sourceFile,
+            language: this.selectedLanguage,
+            product: this.selectedProduct
+        });
+    }
+
+    synchronize() {
+        this.electronService.ipcRenderer.send('client.synchronize', {
+            targetFile: this.targetFile,
+            sourceFile: this.sourceFile,
+            language: this.selectedLanguage,
+            product: this.selectedProduct
+        });
+    }
+
+    private reset() {
+        this.selectedLanguage = null;
+        this.selectedProduct = null;
+    }
+
 }
