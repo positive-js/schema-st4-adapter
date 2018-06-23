@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { ElectronService } from './providers/electron.service';
 import { TranslateService } from '@ngx-translate/core';
+
 import { AppConfig } from './app.config';
+import { ElectronService } from './providers/electron.service';
+
 
 @Component({
   selector: 'app-root',

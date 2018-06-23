@@ -19,8 +19,7 @@ import { WebviewDirective } from './directives/webview.directive';
 
 import { AppComponent } from './app.component';
 import { ConversionComponent } from './components/conversion/conversion.component';
-import { ToJsonComponent } from './components/to-json/to-json.component';
-import { ToXmlComponent } from './components/to-xml/to-xml.component';
+
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -31,9 +30,7 @@ export function HttpLoaderFactory(http: HttpClient) {
   declarations: [
     AppComponent,
     WebviewDirective,
-    ConversionComponent,
-    ToXmlComponent,
-    ToJsonComponent
+    ConversionComponent
   ],
   imports: [
     BrowserModule,
