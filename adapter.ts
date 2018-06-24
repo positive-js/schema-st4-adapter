@@ -4,6 +4,8 @@ import * as _ from 'lodash';
 import * as xml2js from 'xml2js';
 import * as xmldom from 'xmldom';
 import * as xpath from 'xpath';
+import * as XLSX from 'xlsx';
+import { t } from '@angular/core/src/render3';
 
 
 const KEY_ATTRIBUTES = '$';
@@ -24,18 +26,23 @@ const TERM_TAG = 't';
 const ELEMENT_TAG = 'e';
 const ROW_TAG = 'r';
 
+const COUNT_SPACES_INDENT_JSON = 4;
 
 interface IAdapterOptions {
     sourceFile: string;
-    targetFile: string;
+    targetFile?: string;
     language?: string;
-    product: string;
+    product?: string;
 }
 
 interface IAdapter {
-    upload(): void;
+    unload(): void;
 
     synchronize(): void;
+
+    getLanguages(): string[];
+
+    getProducts(): string[];
 }
 
 class AdapterXML2JSON implements IAdapter {
@@ -47,7 +54,7 @@ class AdapterXML2JSON implements IAdapter {
         this.dom = xmldom.DOMParser;
     }
 
-    upload() {
+    unload() {
         this.validation();
 
         const xml = fs.readFileSync(this.options.sourceFile, 'utf8');
@@ -73,8 +80,7 @@ class AdapterXML2JSON implements IAdapter {
                 data[resultKey.toUpperCase()] = value[0] ? value[0].data : '';
             });
 
-            const countSpacesInJSON = 4;
-            const contentFile = JSON.stringify(data, null, countSpacesInJSON);
+            const contentFile = JSON.stringify(data, null, COUNT_SPACES_INDENT_JSON);
 
             fs.writeFileSync(this.options.targetFile, contentFile, { encoding: 'utf8' });
 
@@ -166,6 +172,28 @@ class AdapterXML2JSON implements IAdapter {
         });
     }
 
+    getLanguages(): string[] {
+        const xml = fs.readFileSync(this.options.sourceFile, 'utf8');
+        const document = new this.dom().parseFromString(xml);
+        // tslint:disable-next-line no-http-string
+        const select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
+        const languages = select('//n:Data-Variables.XML/n:Value/@n:Aspect', document);
+
+        return languages.map((attribute: any) => attribute.value);
+    }
+
+    getProducts(): string[] {
+        const xml = fs.readFileSync(this.options.sourceFile, 'utf8');
+        const document = new this.dom().parseFromString(xml);
+        // tslint:disable-next-line no-http-string
+        const select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
+        const products = select(`//n:Data-Variables.XML/n:Value[@n:Aspect="${this.options.language}"]/n:Entry/variables/h/e/text()`,
+            document);
+
+        return products.map((text: any) => text.data);
+    }
+
+
     private validation() {
         if (!this.options.targetFile || !this.options.sourceFile) {
             throw new Error('Path to source file or target file are not defined');
@@ -207,4 +235,63 @@ class AdapterXML2JSON implements IAdapter {
     }
 }
 
-export { IAdapter, AdapterXML2JSON, IAdapterOptions };
+class AdapterXLS2JSON implements IAdapter {
+    constructor(private options: IAdapterOptions) {
+    }
+
+    unload() {
+        const workbook = XLSX.readFile(this.options.sourceFile);
+        const worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        const worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+
+        console.log(worksheetJSON);
+
+        const data = _.reduce(worksheetJSON, (resources, current: any) => {
+            resources[current.__EMPTY] = current[this.options.product];
+
+            return resources;
+        }, {});
+
+        console.log(data);
+
+        const contentFile = JSON.stringify(data, null, COUNT_SPACES_INDENT_JSON);
+
+        fs.writeFileSync(this.options.targetFile, contentFile, { encoding: 'utf8' });
+    }
+
+    synchronize() {
+        const json = fs.readFileSync(this.options.targetFile, 'utf8');
+        const dataJSON = JSON.parse(json);
+
+        const data = _.map(_.keys(dataJSON), (key) => {
+            return [
+                key,
+                dataJSON[key]
+            ];
+        });
+
+        // manual format header
+        data.unshift([undefined, this.options.product]);
+
+        const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+        const workbook = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(workbook, worksheet);
+        XLSX.writeFile(workbook, this.options.sourceFile);
+    }
+
+    getLanguages(): string[] {
+        throw new Error('Not supported operation');
+    }
+
+    getProducts(): string[] {
+        const workbook = XLSX.readFile(this.options.sourceFile);
+        const worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        const worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+
+        return _.filter(_.keys(worksheetJSON[0]), (column) => column !== '__EMPTY');
+    }
+}
+
+export { IAdapter, AdapterXML2JSON, AdapterXLS2JSON, IAdapterOptions };

@@ -3,6 +3,11 @@ import { Component, NgZone, OnInit } from '@angular/core';
 import { ElectronService } from '../../providers/electron.service';
 
 
+enum EXTENSIONS {
+    XML = 'xml',
+    XLS = 'xls'
+}
+
 @Component({
     selector: 'app-conversion',
     templateUrl: './conversion.component.html',
@@ -15,6 +20,7 @@ export class ConversionComponent implements OnInit {
     selectedLanguage: string;
     products: string[];
     selectedProduct: string;
+    extension: string;
 
     constructor(private electronService: ElectronService, private zone: NgZone) { }
 
@@ -31,9 +37,10 @@ export class ConversionComponent implements OnInit {
             });
         });
 
-        this.electronService.ipcRenderer.on('electron.source-loaded', (_event, sourceFile) => {
+        this.electronService.ipcRenderer.on('electron.source-loaded', (_event, data) => {
             this.zone.run(() => {
-                this.sourceFile = sourceFile;
+                this.sourceFile = data.sourceFile;
+                this.extension = data.extension;
                 this.reset();
             });
         });
@@ -73,6 +80,24 @@ export class ConversionComponent implements OnInit {
             language: this.selectedLanguage,
             product: this.selectedProduct
         });
+    }
+
+    canSelectLanguage() {
+        return this.extension === EXTENSIONS.XML && this.sourceFile && this.targetFile;
+    }
+
+    canSelectProduct() {
+        return (this.selectedLanguage && this.extension === EXTENSIONS.XML) ||
+            (this.sourceFile && this.extension !== EXTENSIONS.XML);
+    }
+
+    canUnloadAndSynchronize() {
+        return (this.extension === EXTENSIONS.XML && this.selectedLanguage && this.selectedProduct) ||
+            (this.extension === EXTENSIONS.XLS && this.selectedProduct);
+    }
+
+    canShowLanguages() {
+        return this.extension === EXTENSIONS.XML;
     }
 
     private reset() {

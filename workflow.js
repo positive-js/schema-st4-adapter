@@ -1,36 +1,20 @@
 "use strict";
 exports.__esModule = true;
 var electron_1 = require("electron");
-var fs = require("fs");
 var path = require("path");
 var xmldom = require("xmldom");
-var xpath = require("xpath");
 var adapter_1 = require("./adapter");
 var dom = xmldom.DOMParser;
-function getLanguages(pathToXMLFile) {
-    var xml = fs.readFileSync(pathToXMLFile, 'utf8');
-    var document = new dom().parseFromString(xml);
-    // tslint:disable-next-line no-http-string
-    var select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
-    var languages = select('//n:Data-Variables.XML/n:Value/@n:Aspect', document);
-    return languages.map(function (attribute) { return attribute.value; });
-}
-function getProducts(pathToXMLFile, language) {
-    var xml = fs.readFileSync(pathToXMLFile, 'utf8');
-    var document = new dom().parseFromString(xml);
-    // tslint:disable-next-line no-http-string
-    var select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
-    var products = select("//n:Data-Variables.XML/n:Value[@n:Aspect=\"" + language + "\"]/n:Entry/variables/h/e/text()", document);
-    return products.map(function (text) { return text.data; });
+function getExtension(filename) {
+    return path.extname(filename).toLocaleLowerCase().slice(1);
 }
 function getAdapter(options) {
-    console.log(options);
-    var extension = path.extname(options.sourceFile).toLocaleLowerCase().slice(1);
-    console.log(extension);
+    var extension = getExtension(options.sourceFile);
     switch (extension) {
         case 'xml':
             return new adapter_1.AdapterXML2JSON(options);
         case 'xls':
+            return new adapter_1.AdapterXLS2JSON(options);
         default:
             throw new Error('Adapter not found for selected file');
     }
@@ -40,22 +24,27 @@ var registerWorkflow = function (win) {
         var paths = electron_1.dialog.showOpenDialog(win, {
             filters: [
                 {
-                    name: 'Exported XML files',
-                    extensions: ['xml']
+                    name: 'Exported XML or XLS files',
+                    extensions: ['xml', 'xls']
                 }
-                // {
-                //     name: 'Exported XLS files',
-                //     extensions: ['xls']
-                // }
             ],
             properties: [
                 'openFile'
             ]
         });
         if (paths && paths.length > 0) {
-            var languages = getLanguages(paths[0]);
-            event.sender.send('electron.source-loaded', paths[0]);
-            event.sender.send('electron.languages-loaded', languages);
+            var sourceFile = paths[0];
+            var extension = getExtension(sourceFile);
+            var adapter = getAdapter({ sourceFile: sourceFile });
+            event.sender.send('electron.source-loaded', { sourceFile: sourceFile, extension: extension });
+            if (extension === 'xml') {
+                var languages = adapter.getLanguages();
+                event.sender.send('electron.languages-loaded', languages);
+            }
+            if (extension === 'xls') {
+                var products = adapter.getProducts();
+                event.sender.send('electron.products-loaded', products);
+            }
         }
     });
     electron_1.ipcMain.on('client.select-target', function (event) {
@@ -72,13 +61,14 @@ var registerWorkflow = function (win) {
         }
     });
     electron_1.ipcMain.on('client.select-language', function (event, xmlFile, language) {
-        var products = getProducts(xmlFile, language);
+        var adapter = getAdapter({ sourceFile: xmlFile, language: language });
+        var products = adapter.getProducts();
         event.sender.send('electron.products-loaded', products);
     });
     electron_1.ipcMain.on('client.unload', function (_event, options) {
         try {
             var adapter = getAdapter(options);
-            adapter.upload();
+            adapter.unload();
             electron_1.dialog.showMessageBox(win, {
                 type: 'info',
                 title: 'Success',

@@ -6,6 +6,7 @@ var _ = require("lodash");
 var xml2js = require("xml2js");
 var xmldom = require("xmldom");
 var xpath = require("xpath");
+var XLSX = require("xlsx");
 var KEY_ATTRIBUTES = '$';
 var KEY_VALUE = '_';
 var ASPECT_ATTR = 'n:Aspect';
@@ -22,13 +23,14 @@ var HEADER_TAG = 'h';
 var TERM_TAG = 't';
 var ELEMENT_TAG = 'e';
 var ROW_TAG = 'r';
+var COUNT_SPACES_INDENT_JSON = 4;
 var AdapterXML2JSON = /** @class */ (function () {
     function AdapterXML2JSON(options) {
         this.options = options;
         this.entities = new HtmlEntitities.XmlEntities();
         this.dom = xmldom.DOMParser;
     }
-    AdapterXML2JSON.prototype.upload = function () {
+    AdapterXML2JSON.prototype.unload = function () {
         var _this = this;
         this.validation();
         var xml = fs.readFileSync(this.options.sourceFile, 'utf8');
@@ -48,8 +50,7 @@ var AdapterXML2JSON = /** @class */ (function () {
                 var resultKey = key[0] ? _this.entities.decode(key[0].data) : '';
                 data_1[resultKey.toUpperCase()] = value[0] ? value[0].data : '';
             });
-            var countSpacesInJSON = 4;
-            var contentFile = JSON.stringify(data_1, null, countSpacesInJSON);
+            var contentFile = JSON.stringify(data_1, null, COUNT_SPACES_INDENT_JSON);
             fs.writeFileSync(this.options.targetFile, contentFile, { encoding: 'utf8' });
         }
         else {
@@ -126,6 +127,22 @@ var AdapterXML2JSON = /** @class */ (function () {
             var _a, _b, _c;
         });
     };
+    AdapterXML2JSON.prototype.getLanguages = function () {
+        var xml = fs.readFileSync(this.options.sourceFile, 'utf8');
+        var document = new this.dom().parseFromString(xml);
+        // tslint:disable-next-line no-http-string
+        var select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
+        var languages = select('//n:Data-Variables.XML/n:Value/@n:Aspect', document);
+        return languages.map(function (attribute) { return attribute.value; });
+    };
+    AdapterXML2JSON.prototype.getProducts = function () {
+        var xml = fs.readFileSync(this.options.sourceFile, 'utf8');
+        var document = new this.dom().parseFromString(xml);
+        // tslint:disable-next-line no-http-string
+        var select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
+        var products = select("//n:Data-Variables.XML/n:Value[@n:Aspect=\"" + this.options.language + "\"]/n:Entry/variables/h/e/text()", document);
+        return products.map(function (text) { return text.data; });
+    };
     AdapterXML2JSON.prototype.validation = function () {
         if (!this.options.targetFile || !this.options.sourceFile) {
             throw new Error('Path to source file or target file are not defined');
@@ -163,3 +180,49 @@ var AdapterXML2JSON = /** @class */ (function () {
     return AdapterXML2JSON;
 }());
 exports.AdapterXML2JSON = AdapterXML2JSON;
+var AdapterXLS2JSON = /** @class */ (function () {
+    function AdapterXLS2JSON(options) {
+        this.options = options;
+    }
+    AdapterXLS2JSON.prototype.unload = function () {
+        var _this = this;
+        var workbook = XLSX.readFile(this.options.sourceFile);
+        var worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        var worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+        console.log(worksheetJSON);
+        var data = _.reduce(worksheetJSON, function (resources, current) {
+            resources[current.__EMPTY] = current[_this.options.product];
+            return resources;
+        }, {});
+        console.log(data);
+        var contentFile = JSON.stringify(data, null, COUNT_SPACES_INDENT_JSON);
+        fs.writeFileSync(this.options.targetFile, contentFile, { encoding: 'utf8' });
+    };
+    AdapterXLS2JSON.prototype.synchronize = function () {
+        var json = fs.readFileSync(this.options.targetFile, 'utf8');
+        var dataJSON = JSON.parse(json);
+        var data = _.map(_.keys(dataJSON), function (key) {
+            return [
+                key,
+                dataJSON[key]
+            ];
+        });
+        // manual format header
+        data.unshift([undefined, this.options.product]);
+        var worksheet = XLSX.utils.aoa_to_sheet(data);
+        var workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet);
+        XLSX.writeFile(workbook, this.options.sourceFile);
+    };
+    AdapterXLS2JSON.prototype.getLanguages = function () {
+        throw new Error('Not supported operation');
+    };
+    AdapterXLS2JSON.prototype.getProducts = function () {
+        var workbook = XLSX.readFile(this.options.sourceFile);
+        var worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        var worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+        return _.filter(_.keys(worksheetJSON[0]), function (column) { return column !== '__EMPTY'; });
+    };
+    return AdapterXLS2JSON;
+}());
+exports.AdapterXLS2JSON = AdapterXLS2JSON;

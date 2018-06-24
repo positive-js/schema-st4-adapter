@@ -5,40 +5,24 @@ import * as path from 'path';
 import * as xmldom from 'xmldom';
 import * as xpath from 'xpath';
 
-import { AdapterXML2JSON, IAdapter, IAdapterOptions } from './adapter';
+import { AdapterXLS2JSON, AdapterXML2JSON, IAdapter, IAdapterOptions } from './adapter';
 
 
 const dom = xmldom.DOMParser;
 
 
-function getLanguages(pathToXMLFile) {
-    const xml = fs.readFileSync(pathToXMLFile, 'utf8');
-    const document = new dom().parseFromString(xml);
-    // tslint:disable-next-line no-http-string
-    const select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
-    const languages = select('//n:Data-Variables.XML/n:Value/@n:Aspect', document);
-
-    return languages.map((attribute: any) => attribute.value);
-}
-
-function getProducts(pathToXMLFile, language) {
-    const xml = fs.readFileSync(pathToXMLFile, 'utf8');
-    const document = new dom().parseFromString(xml);
-    // tslint:disable-next-line no-http-string
-    const select = xpath.useNamespaces({ n: 'http://www.schema.de/2004/ST4/XmlImportExport/Node' });
-    const products = select(`//n:Data-Variables.XML/n:Value[@n:Aspect="${language}"]/n:Entry/variables/h/e/text()`,
-        document);
-
-    return products.map((text: any) => text.data);
+function getExtension(filename) {
+    return path.extname(filename).toLocaleLowerCase().slice(1);
 }
 
 function getAdapter(options) {
-    const extension = path.extname(options.sourceFile).toLocaleLowerCase().slice(1);
+    const extension = getExtension(options.sourceFile);
 
     switch (extension) {
         case 'xml':
             return new AdapterXML2JSON(options);
         case 'xls':
+            return new AdapterXLS2JSON(options);
         default:
             throw new Error('Adapter not found for selected file');
     }
@@ -51,13 +35,9 @@ const registerWorkflow = (win) => {
             {
                 filters: [
                     {
-                        name: 'Exported XML files',
-                        extensions: ['xml']
+                        name: 'Exported XML or XLS files',
+                        extensions: ['xml', 'xls']
                     }
-                    // {
-                    //     name: 'Exported XLS files',
-                    //     extensions: ['xls']
-                    // }
                 ],
                 properties: [
                     'openFile'
@@ -66,9 +46,23 @@ const registerWorkflow = (win) => {
         );
 
         if (paths && paths.length > 0) {
-            const languages = getLanguages(paths[0]);
-            event.sender.send('electron.source-loaded', paths[0]);
-            event.sender.send('electron.languages-loaded', languages);
+            const sourceFile = paths[0];
+            const extension = getExtension(sourceFile);
+            const adapter: IAdapter = getAdapter({ sourceFile });
+
+            event.sender.send('electron.source-loaded', { sourceFile, extension });
+
+            if (extension === 'xml') {
+                const languages = adapter.getLanguages();
+                event.sender.send('electron.languages-loaded', languages);
+            }
+
+            if (extension === 'xls') {
+                const products = adapter.getProducts();
+
+                event.sender.send('electron.products-loaded', products);
+            }
+
         }
     });
 
@@ -92,7 +86,9 @@ const registerWorkflow = (win) => {
 
 
     ipcMain.on('client.select-language', (event, xmlFile, language) => {
-        const products = getProducts(xmlFile, language);
+        const adapter: IAdapter = getAdapter({ sourceFile: xmlFile, language });
+        const products = adapter.getProducts();
+
         event.sender.send('electron.products-loaded', products);
     });
 
@@ -100,7 +96,7 @@ const registerWorkflow = (win) => {
         try {
             const adapter: IAdapter = getAdapter(options);
 
-            adapter.upload();
+            adapter.unload();
 
             dialog.showMessageBox(win, {
                 type: 'info',

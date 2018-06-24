@@ -17,11 +17,11 @@
                 <em></em>
             </p>
         </li>
-        <li>
+        <li *ngIf="canShowLanguages()">
             <span>Select language</span>
             <select class="form-control"
                     [(ngModel)]="selectedLanguage"
-                    [disabled]="!sourceFile || !targetFile"
+                    [disabled]="!canSelectLanguage()"
                     (change)="onChangeLanguage()">
                 <option *ngFor="let language of languages" [value]="language">{{language}}</option>
             </select>
@@ -33,7 +33,7 @@
             <span>Select product</span>
             <select class="form-control"
                     [(ngModel)]="selectedProduct"
-                    [disabled]="!selectedLanguage">
+                    [disabled]="!canSelectProduct()">
                 <option *ngFor="let product of products" [value]="product">{{product}}</option>
             </select>
             <p>
@@ -43,12 +43,12 @@
         <li>
             <button class="btn btn-dark"
                     (click)="unload()"
-                    [disabled]="!selectedLanguage || !selectedProduct">
+                    [disabled]="!canUnloadAndSynchronize()">
                 Unload
             </button>
             <button class="btn btn-dark"
                     (click)="synchronize()"
-                    [disabled]="!selectedLanguage || !selectedProduct">
+                    [disabled]="!canUnloadAndSynchronize()">
                 Synchronize
             </button>
         </li>
