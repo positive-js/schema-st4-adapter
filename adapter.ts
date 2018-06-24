@@ -244,15 +244,11 @@ class AdapterXLS2JSON implements IAdapter {
         const worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
         const worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
 
-        console.log(worksheetJSON);
-
         const data = _.reduce(worksheetJSON, (resources, current: any) => {
             resources[current.__EMPTY] = current[this.options.product];
 
             return resources;
         }, {});
-
-        console.log(data);
 
         const contentFile = JSON.stringify(data, null, COUNT_SPACES_INDENT_JSON);
 
