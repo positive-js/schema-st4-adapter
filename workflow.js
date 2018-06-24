@@ -2,10 +2,10 @@
 exports.__esModule = true;
 var electron_1 = require("electron");
 var fs = require("fs");
+var path = require("path");
 var xmldom = require("xmldom");
 var xpath = require("xpath");
-var run_to_json_1 = require("./run-to-json");
-var run_to_xml_1 = require("./run-to-xml");
+var adapter_1 = require("./adapter");
 var dom = xmldom.DOMParser;
 function getLanguages(pathToXMLFile) {
     var xml = fs.readFileSync(pathToXMLFile, 'utf8');
@@ -23,18 +23,30 @@ function getProducts(pathToXMLFile, language) {
     var products = select("//n:Data-Variables.XML/n:Value[@n:Aspect=\"" + language + "\"]/n:Entry/variables/h/e/text()", document);
     return products.map(function (text) { return text.data; });
 }
+function getAdapter(options) {
+    console.log(options);
+    var extension = path.extname(options.sourceFile).toLocaleLowerCase().slice(1);
+    console.log(extension);
+    switch (extension) {
+        case 'xml':
+            return new adapter_1.AdapterXML2JSON(options);
+        case 'xls':
+        default:
+            throw new Error('Adapter not found for selected file');
+    }
+}
 var registerWorkflow = function (win) {
     electron_1.ipcMain.on('client.select-source', function (event) {
         var paths = electron_1.dialog.showOpenDialog(win, {
             filters: [
                 {
-                    name: 'Экспортированные XML файлы',
+                    name: 'Exported XML files',
                     extensions: ['xml']
-                },
-                {
-                    name: 'Экспортированные XLS файлы',
-                    extensions: ['xls']
                 }
+                // {
+                //     name: 'Exported XLS files',
+                //     extensions: ['xls']
+                // }
             ],
             properties: [
                 'openFile'
@@ -65,7 +77,8 @@ var registerWorkflow = function (win) {
     });
     electron_1.ipcMain.on('client.unload', function (_event, options) {
         try {
-            run_to_json_1.runToJSON(options);
+            var adapter = getAdapter(options);
+            adapter.upload();
             electron_1.dialog.showMessageBox(win, {
                 type: 'info',
                 title: 'Success',
@@ -84,7 +97,8 @@ var registerWorkflow = function (win) {
     });
     electron_1.ipcMain.on('client.synchronize', function (_event, options) {
         try {
-            run_to_xml_1.runToXML(options);
+            var adapter = getAdapter(options);
+            adapter.synchronize();
             electron_1.dialog.showMessageBox(win, {
                 type: 'info',
                 title: 'Success',

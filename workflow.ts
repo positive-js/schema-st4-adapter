@@ -1,11 +1,11 @@
 import { ipcMain, dialog } from 'electron';
 import * as fs from 'fs';
 
+import * as path from 'path';
 import * as xmldom from 'xmldom';
 import * as xpath from 'xpath';
 
-import { runToJSON } from './run-to-json';
-import { runToXML } from './run-to-xml';
+import { AdapterXML2JSON, IAdapter, IAdapterOptions } from './adapter';
 
 
 const dom = xmldom.DOMParser;
@@ -30,6 +30,18 @@ function getProducts(pathToXMLFile, language) {
         document);
 
     return products.map((text: any) => text.data);
+}
+
+function getAdapter(options) {
+    const extension = path.extname(options.sourceFile).toLocaleLowerCase().slice(1);
+
+    switch (extension) {
+        case 'xml':
+            return new AdapterXML2JSON(options);
+        case 'xls':
+        default:
+            throw new Error('Adapter not found for selected file');
+    }
 }
 
 const registerWorkflow = (win) => {
@@ -84,9 +96,11 @@ const registerWorkflow = (win) => {
         event.sender.send('electron.products-loaded', products);
     });
 
-    ipcMain.on('client.unload', (_event, options) => {
+    ipcMain.on('client.unload', (_event, options: IAdapterOptions) => {
         try {
-            runToJSON(options);
+            const adapter: IAdapter = getAdapter(options);
+
+            adapter.upload();
 
             dialog.showMessageBox(win, {
                 type: 'info',
@@ -104,9 +118,11 @@ const registerWorkflow = (win) => {
         }
     });
 
-    ipcMain.on('client.synchronize', (_event, options) => {
+    ipcMain.on('client.synchronize', (_event, options: IAdapterOptions) => {
         try {
-            runToXML(options);
+            const adapter: IAdapter = getAdapter(options);
+
+            adapter.synchronize();
 
             dialog.showMessageBox(win, {
                 type: 'info',
