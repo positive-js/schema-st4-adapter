@@ -1,24 +1,30 @@
 <div class="container-fluid">
     <ol>
         <li>
-            <span>Select source file</span>
-            <button class="btn btn-light" (click)="selectSourceFile()">Browse</button>
+            <span [translate]="'PAGES.CONVERSION.LABEL.SELECT-SOURCE-FILE'"></span>
+            <button class="btn btn-light"
+                    [translate]="'PAGES.CONVERSION.BUTTON.BROWSE'"
+                    (click)="selectSourceFile()">
+            </button>
             <strong>{{ sourceFile }}</strong>
             <br>
             <p>
-                <em></em>
+                <em [translate]="'PAGES.CONVERSION.HINT.SELECT-SOURCE-FILE'"></em>
             </p>
         </li>
         <li>
-            <span>Select target file</span>
-            <button class="btn btn-light" (click)="selectTargetFile()">Browse</button>
+            <span [translate]="'PAGES.CONVERSION.LABEL.SELECT-TARGET-FILE'">Select target file</span>
+            <button class="btn btn-light"
+                    (click)="selectTargetFile()"
+                    [translate]="'PAGES.CONVERSION.BUTTON.BROWSE'">
+            </button>
             <span>{{ targetFile }}</span>
             <p>
-                <em></em>
+                <em [translate]="'PAGES.CONVERSION.HINT.SELECT-TARGET-FILE'"></em>
             </p>
         </li>
         <li *ngIf="canShowLanguages()">
-            <span>Select language</span>
+            <span [translate]="'PAGES.CONVERSION.LABEL.SELECT-LANGUAGE'"></span>
             <select class="form-control"
                     [(ngModel)]="selectedLanguage"
                     [disabled]="!canSelectLanguage()"
@@ -26,30 +32,30 @@
                 <option *ngFor="let language of languages" [value]="language">{{language}}</option>
             </select>
             <p>
-                <em>I will compare strings only on the selected language</em>
+                <em [translate]="'PAGES.CONVERSION.HINT.SELECT-LANGUAGE'"></em>
             </p>
         </li>
         <li>
-            <span>Select product</span>
+            <span [translate]="'PAGES.CONVERSION.LABEL.SELECT-PRODUCT'"></span>
             <select class="form-control"
                     [(ngModel)]="selectedProduct"
                     [disabled]="!canSelectProduct()">
                 <option *ngFor="let product of products" [value]="product">{{product}}</option>
             </select>
             <p>
-                <em>I will compare strings only for the selected product</em>
+                <em [translate]="'PAGES.CONVERSION.HINT.SELECT-PRODUCT'"></em>
             </p>
         </li>
         <li>
             <button class="btn btn-dark"
                     (click)="unload()"
-                    [disabled]="!canUnloadAndSynchronize()">
-                Unload
+                    [disabled]="!canUnloadAndSynchronize()"
+                    [translate]="'PAGES.CONVERSION.BUTTON.UNLOAD'">
             </button>
             <button class="btn btn-dark"
                     (click)="synchronize()"
-                    [disabled]="!canUnloadAndSynchronize()">
-                Synchronize
+                    [disabled]="!canUnloadAndSynchronize()"
+                    [translate]="'PAGES.CONVERSION.BUTTON.SYNCHRONIZE'">
             </button>
         </li>
     </ol>

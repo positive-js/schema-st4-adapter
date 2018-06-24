@@ -189,12 +189,10 @@ var AdapterXLS2JSON = /** @class */ (function () {
         var workbook = XLSX.readFile(this.options.sourceFile);
         var worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
         var worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
-        console.log(worksheetJSON);
         var data = _.reduce(worksheetJSON, function (resources, current) {
             resources[current.__EMPTY] = current[_this.options.product];
             return resources;
         }, {});
-        console.log(data);
         var contentFile = JSON.stringify(data, null, COUNT_SPACES_INDENT_JSON);
         fs.writeFileSync(this.options.targetFile, contentFile, { encoding: 'utf8' });
     };

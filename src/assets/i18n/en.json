@@ -1,7 +1,23 @@
 {
   "PAGES": {
-      "HOME": {
-          "TITLE": "App works!"
+      "CONVERSION": {
+          "LABEL": {
+              "SELECT-SOURCE-FILE": "Select source file",
+              "SELECT-TARGET-FILE": "Select target file",
+              "SELECT-LANGUAGE": "Select language",
+              "SELECT-PRODUCT": "Select product"
+          },
+          "HINT": {
+              "SELECT-SOURCE-FILE": "",
+              "SELECT-TARGET-FILE": "",
+              "SELECT-LANGUAGE": "I will compare strings only on the selected language",
+              "SELECT-PRODUCT": "I will compare strings only for the selected product"
+          },
+          "BUTTON": {
+              "BROWSE": "Browse",
+              "UNLOAD": "Unload",
+              "SYNCHRONIZE": "Synchronize"
+          }
       }
   }
 }
