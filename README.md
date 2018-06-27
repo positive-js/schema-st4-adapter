@@ -7,6 +7,6 @@
 ![Github Pre-Releases (Windows)](https://img.shields.io/github/downloads-pre/positive-js/schema-st4-adapter/latest/schema-st4-adapter.0.3.0.exe.svg)
 ![Github Pre-Releases (Linux)](https://img.shields.io/github/downloads-pre/positive-js/schema-st4-adapter/latest/schema-st4-adapter-0.3.0-x86_64.AppImage.svg)
 
-Adapter for converting files of localization (xml&lt;=>json)
+Adapter for converting files of localization (SCHEMA &lt;=> JSON)
 
-[Download links](https://github.com/positive-js/schema-st4-adapter/releases) for latest release
+[Download links](https://github.com/positive-js/schema-st4-adapter/releases)
