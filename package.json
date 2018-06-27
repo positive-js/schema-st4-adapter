@@ -1,6 +1,6 @@
 {
   "name": "schema-st4-adapter",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Adapter for converting files of localization",
   "homepage": "https://gitlab.ptsecurity.com/ui-core/schema-st4-adapter",
   "author": "Positive Technologies",
