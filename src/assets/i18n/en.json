@@ -2,21 +2,21 @@
   "PAGES": {
       "CONVERSION": {
           "LABEL": {
-              "SELECT-SOURCE-FILE": "Select source file",
-              "SELECT-TARGET-FILE": "Select target file",
+              "SELECT-SOURCE-FILE": "Select source SCHEMA file (XML or Excel)",
+              "SELECT-TARGET-FILE": "Select target JSON file",
               "SELECT-LANGUAGE": "Select language",
               "SELECT-PRODUCT": "Select product"
           },
           "HINT": {
-              "SELECT-SOURCE-FILE": "",
-              "SELECT-TARGET-FILE": "",
+              "SELECT-SOURCE-FILE": "I will process this file",
+              "SELECT-TARGET-FILE": "I will compare this file with SCHEMA file and define delta for synchronization",
               "SELECT-LANGUAGE": "I will compare strings only on the selected language",
               "SELECT-PRODUCT": "I will compare strings only for the selected product"
           },
           "BUTTON": {
               "BROWSE": "Browse",
-              "UNLOAD": "Unload",
-              "SYNCHRONIZE": "Synchronize"
+              "UNLOAD": "SCHEMA -> JSON",
+              "SYNCHRONIZE": "JSON -> SCHEMA"
           }
       }
   }
