@@ -1,9 +1,7 @@
 import { ipcMain, dialog } from 'electron';
-import * as fs from 'fs';
 
 import * as path from 'path';
 import * as xmldom from 'xmldom';
-import * as xpath from 'xpath';
 
 import { AdapterXLS2JSON, AdapterXML2JSON, IAdapter, IAdapterOptions } from './adapter';
 

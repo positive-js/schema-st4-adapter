@@ -5,7 +5,6 @@ import * as xml2js from 'xml2js';
 import * as xmldom from 'xmldom';
 import * as xpath from 'xpath';
 import * as XLSX from 'xlsx';
-import { t } from '@angular/core/src/render3';
 
 
 const KEY_ATTRIBUTES = '$';
