@@ -34,7 +34,9 @@
         "e2e": "npm run postinstall:web && ng e2e"
     },
     "dependencies": {
-        "bootstrap": "4.1.1",
+        "@ptsecurity/mosaic-icons": "2.5.2",
+        "@ptsecurity/cdk": "github:positive-js/cdk-builds",
+        "@ptsecurity/mosaic": "github:positive-js/mosaic-builds",
         "html-entities": "1.2.1",
         "jquery": "3.3.1",
         "lodash": "4.17.10",
