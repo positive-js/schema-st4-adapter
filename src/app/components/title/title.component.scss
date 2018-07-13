@@ -1,0 +1,24 @@
+.app-title {
+    height: 56px;
+    box-shadow: 0 1px 0 0 #e6e6e6;
+    padding-left: 16px;
+    -webkit-app-region: drag;
+}
+
+.app-title__text {
+    font-size: 20px;
+    font-weight: 500;
+    color: #4d4d4d;
+}
+
+.app-title__close {
+    width: 56px;
+    height: 100%;
+    color: #999999;
+    cursor: default;
+    -webkit-app-region: no-drag;
+
+    &:hover {
+        color: #4d4d4d;
+    }
+}

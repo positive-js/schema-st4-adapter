@@ -14,6 +14,7 @@ import '../polyfills';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
+import { TitleComponent } from './components/title/title.component';
 import { WebviewDirective } from './directives/webview.directive';
 import { ElectronService } from './providers/electron.service';
 import { ConversionComponent } from './routes/conversion/conversion.component';
@@ -37,7 +38,8 @@ export function HttpLoaderFactory(http: HttpClient) {
         ReplacementComponent,
         SettingsComponent,
         HelpComponent,
-        RecentActionsComponent
+        RecentActionsComponent,
+        TitleComponent
     ],
     imports: [
         BrowserModule,

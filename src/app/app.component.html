@@ -1,11 +1,18 @@
-<div fxLayout="row">
+<div fxLayout="column" fxFill>
+    <app-title fxFlex="nogrow"></app-title>
 
-    <navigation fxFlex="nogrow"></navigation>
+    <div fxFlex fxLayout="row" style="-webkit-app-region: no-drag;">
 
-    <div fxFlex>
-        <router-outlet></router-outlet>
+        <navigation fxFlex="nogrow"></navigation>
+
+        <div fxFlex>
+            <router-outlet></router-outlet>
+        </div>
+
     </div>
-
 </div>
+
+
+
 
 
