@@ -42,6 +42,7 @@
         "html-entities": "1.2.1",
         "jquery": "3.3.1",
         "lodash": "4.17.10",
+        "material-design-icons": "^3.0.1",
         "popper.js": "1.14.3",
         "xlsx": "0.13.2",
         "xml2js": "0.4.19",
