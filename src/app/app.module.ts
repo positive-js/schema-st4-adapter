@@ -17,6 +17,10 @@ import { NavigationComponent } from './components/navigation/navigation.componen
 import { WebviewDirective } from './directives/webview.directive';
 import { ElectronService } from './providers/electron.service';
 import { ConversionComponent } from './routes/conversion/conversion.component';
+import { HelpComponent } from './routes/help/help.component';
+import { RecentActionsComponent } from './routes/recent-actions/recent-actions.component';
+import { ReplacementComponent } from './routes/replacement/replacement.component';
+import { SettingsComponent } from './routes/settings/settings.component';
 
 
 // AoT requires an exported function for factories
@@ -29,7 +33,11 @@ export function HttpLoaderFactory(http: HttpClient) {
         AppComponent,
         ConversionComponent,
         WebviewDirective,
-        NavigationComponent
+        NavigationComponent,
+        ReplacementComponent,
+        SettingsComponent,
+        HelpComponent,
+        RecentActionsComponent
     ],
     imports: [
         BrowserModule,
