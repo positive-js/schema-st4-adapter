@@ -1,4 +1,4 @@
-import { ConversionComponent } from './components/conversion/conversion.component';
+import { ConversionComponent } from './routes/conversion/conversion.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
