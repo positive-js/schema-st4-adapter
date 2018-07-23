@@ -1,23 +1,28 @@
-import { app, BrowserWindow, dialog, screen } from 'electron';
+import { app, BrowserWindow, screen } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
-import { registerWorkflow } from './workflow';
 
-let win, serve;
+import { registerWorkflow } from './workflow/';
+
+
+let win;
+let serve;
 const args = process.argv.slice(1);
-serve = args.some(val => val === '--serve');
+
+serve = args.some((val) => val === '--serve');
 
 function createWindow() {
 
     const electronScreen = screen;
-    const size = electronScreen.getPrimaryDisplay().workAreaSize;
 
     // Create the browser window.
     win = new BrowserWindow({
         x: 0,
         y: 0,
-        width: size.width,
-        height: size.height,
+        width: 800,
+        minWidth: 800,
+        height: 600,
+        minHeight: 600,
         frame: false
     });
 

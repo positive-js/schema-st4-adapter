@@ -1,0 +1,24 @@
+<div class="file-loader__container">
+
+    <div class="file-loader__placeholder" *ngIf="!file">
+        <div class="file-loader__title">{{title}}</div>
+        <div class="file-loader__description">
+            <span class="file-loader__link" (click)="selectFile()">Select...</span>
+            <!--<span>Drag file here</span>&nbsp;<span class="file-loader__link" (click)="selectFile()">or select</span>-->
+        </div>
+    </div>
+
+    <div class="file-loader__data" *ngIf="file">
+        <div class="file-loader__title">{{filename}}</div>
+        <div class="file-loader__description">{{folder}}</div>
+    </div>
+
+    <div class="file-loader__control-panel"
+         fxLayout
+         fxLayoutGap="24px"
+         *ngIf="file">
+
+        <i class="material-icons" (click)="selectFile()">folder_open</i>
+        <i class="material-icons" (click)="clear()">close</i>
+    </div>
+</div>

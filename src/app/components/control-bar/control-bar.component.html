@@ -1,0 +1,11 @@
+<div fxLayout fxLayoutAlign="space-between center">
+    <div #left>
+        <ng-content select=".control-bar__left"></ng-content>
+    </div>
+    <div *ngIf="left.childNodes.length === 0" class="control-bar__left"></div>
+
+    <div #right>
+        <ng-content select=".control-bar__right"></ng-content>
+    </div>
+    <div *ngIf="right.childNodes.length === 0" class="control-bar__right"></div>
+</div>

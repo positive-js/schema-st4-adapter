@@ -10,6 +10,11 @@ import { SettingsComponent } from './routes/settings/settings.component';
 
 const routes: Routes = [
     {
+        path: '',
+        redirectTo: '/replace',
+        pathMatch: 'full'
+    },
+    {
         path: 'recent-actions',
         component: RecentActionsComponent
     },

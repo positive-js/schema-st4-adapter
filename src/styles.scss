@@ -1,5 +1,5 @@
-@import '../node_modules/@ptsecurity/mosaic/prebuilt-themes/default-theme.css';
-@import '../node_modules/material-design-icons/iconfont/material-icons.css';
+@import '~@ptsecurity/mosaic/prebuilt-themes/default-theme.css';
+@import '~material-design-icons/iconfont/material-icons.css';
 
 /* You can add global styles to this file, and also import other style files */
 html, body {
@@ -7,9 +7,12 @@ html, body {
     padding: 0;
 
     height: 100%;
+
+    color: #4d4d4d;
 }
 
 * {
     -webkit-user-drag: none;
     -webkit-user-select: none;
+    cursor: default;
 }

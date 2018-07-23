@@ -1,0 +1,34 @@
+.file-loader {
+    position: relative;
+    border: dashed 1px #b3b3b3;
+    border-radius: 3px;
+    padding: 32px 16px;
+
+    .material-icons {
+        &:hover {
+            color: #999999;
+        }
+    }
+}
+
+.file-loader__title {
+    font-size: 24px;
+}
+
+.file-loader__description {
+    font-size: 15px;
+}
+
+.file-loader__control-panel {
+    position: absolute;
+    top: 12px;
+    right: 20px;
+}
+
+.file-loader__placeholder {
+
+}
+
+.file-loader__link {
+    color: #0089ff;
+}

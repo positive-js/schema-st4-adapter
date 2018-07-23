@@ -1,0 +1,25 @@
+<div fxLayout="column" *ngIf="products && products.length > 1">
+    <label>Products</label>
+
+    <div fxLayout="column">
+        <mc-checkbox *ngFor="let product of products"
+                     [(ngModel)]="_selectedProducts[product]"
+                     (ngModelChange)="onChangeStateProducts($event)">
+            {{product}}
+        </mc-checkbox>
+    </div>
+</div>
+
+<div fxLayout="column" *ngIf="languages && languages.length > 1">
+    <label>Languages</label>
+
+    <div fxLayout="column">
+        <mc-checkbox *ngFor="let language of languages"
+                     [(ngModel)]="_selectedLanguages[language]"
+                     [disabled]="isLanguageDisabled(language)"
+                     (ngModelChange)="onChangeStateLanguages($event)">
+            {{language}}
+        </mc-checkbox>
+    </div>
+</div>
+
