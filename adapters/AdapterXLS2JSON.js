@@ -47,6 +47,7 @@ var AdapterXLS2JSON = /** @class */ (function (_super) {
         }
     };
     AdapterXLS2JSON.prototype.synchronize = function () {
+        //
     };
     return AdapterXLS2JSON;
 }(BaseAdapterXLS_1.BaseAdapterXLS));

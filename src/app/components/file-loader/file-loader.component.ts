@@ -18,7 +18,7 @@ import { ExtensionsFileEnum } from '../../types';
 })
 export class FileLoaderComponent implements OnInit {
     @Input()
-    title: string;
+    header: string;
 
     @Input()
     file: any;

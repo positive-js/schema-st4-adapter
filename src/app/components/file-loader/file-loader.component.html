@@ -1,14 +1,14 @@
 <div class="file-loader__container">
 
     <div class="file-loader__placeholder" *ngIf="!file">
-        <div class="file-loader__title">{{title}}</div>
+        <div class="file-loader__title">{{header}}</div>
         <div class="file-loader__description">
             <span class="file-loader__link" (click)="selectFile()">Select...</span>
             <!--<span>Drag file here</span>&nbsp;<span class="file-loader__link" (click)="selectFile()">or select</span>-->
         </div>
     </div>
 
-    <div class="file-loader__data" *ngIf="file">
+    <div class="file-loader__data" *ngIf="file" fxFlexFill>
         <div class="file-loader__title">{{filename}}</div>
         <div class="file-loader__description">{{folder}}</div>
     </div>

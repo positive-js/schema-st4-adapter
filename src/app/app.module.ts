@@ -15,17 +15,18 @@ import '../polyfills';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ControlBarComponent } from './components/control-bar/control-bar.component';
+import { ConversionOptionsComponent } from './components/conversion-options/conversion-options.component';
+import { ConversionComponent } from './components/conversion/conversion.component';
 import { FileLoaderComponent } from './components/file-loader/file-loader.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { TitleComponent } from './components/title/title.component';
 import { WebviewDirective } from './directives/webview.directive';
 import { ElectronService } from './providers/electron.service';
-import { ConversionComponent } from './routes/conversion/conversion.component';
 import { HelpComponent } from './routes/help/help.component';
 import { RecentActionsComponent } from './routes/recent-actions/recent-actions.component';
 import { ReplacementComponent } from './routes/replacement/replacement.component';
 import { SettingsComponent } from './routes/settings/settings.component';
-import { ReplaceOptionsComponent } from './components/replace-options/replace-options.component';
+import { SynchronizationComponent } from './routes/synchronization/synchronization.component';
 
 
 // AoT requires an exported function for factories
@@ -36,7 +37,6 @@ export function HttpLoaderFactory(http: HttpClient) {
 @NgModule({
     declarations: [
         AppComponent,
-        ConversionComponent,
         WebviewDirective,
         NavigationComponent,
         ReplacementComponent,
@@ -46,7 +46,9 @@ export function HttpLoaderFactory(http: HttpClient) {
         TitleComponent,
         FileLoaderComponent,
         ControlBarComponent,
-        ReplaceOptionsComponent
+        ConversionOptionsComponent,
+        SynchronizationComponent,
+        ConversionComponent
     ],
     imports: [
         BrowserModule,

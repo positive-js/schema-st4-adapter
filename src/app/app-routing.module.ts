@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { ConversionComponent } from './routes/conversion/conversion.component';
 import { HelpComponent } from './routes/help/help.component';
 import { RecentActionsComponent } from './routes/recent-actions/recent-actions.component';
 import { ReplacementComponent } from './routes/replacement/replacement.component';
 import { SettingsComponent } from './routes/settings/settings.component';
+import { SynchronizationComponent } from './routes/synchronization/synchronization.component';
 
 
 const routes: Routes = [
@@ -24,7 +24,7 @@ const routes: Routes = [
     },
     {
         path: 'sync',
-        component: ConversionComponent
+        component: SynchronizationComponent
     },
     {
         path: 'settings',

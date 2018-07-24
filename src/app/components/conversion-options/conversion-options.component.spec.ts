@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ReplaceOptionsComponent } from './replace-options.component';
+import { ConversionOptionsComponent } from './replace-options.component';
 
 describe('ReplaceOptionsComponent', () => {
-  let component: ReplaceOptionsComponent;
-  let fixture: ComponentFixture<ReplaceOptionsComponent>;
+  let component: ConversionOptionsComponent;
+  let fixture: ComponentFixture<ConversionOptionsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ReplaceOptionsComponent ]
+      declarations: [ ConversionOptionsComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ReplaceOptionsComponent);
+    fixture = TestBed.createComponent(ConversionOptionsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

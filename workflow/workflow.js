@@ -44,7 +44,7 @@ function getDialogFilter(side, options) {
 }
 // tslint:disable-next-line max-func-body-length
 var registerWorkflow = function (win) {
-    electron_1.ipcMain.on('client.replace.select-source', function (event, options) {
+    electron_1.ipcMain.on('client.select-source', function (event, options) {
         if (!options.sourceFile) {
             var paths = electron_1.dialog.showOpenDialog(win, {
                 filters: [
@@ -82,7 +82,7 @@ var registerWorkflow = function (win) {
             }
         }
     });
-    electron_1.ipcMain.on('client.replace.select-target', function (event, options) {
+    electron_1.ipcMain.on('client.select-target', function (event, options) {
         if (!options.targetFile) {
             options.targetFile = electron_1.dialog.showSaveDialog(win, {
                 filters: [
@@ -114,12 +114,12 @@ var registerWorkflow = function (win) {
             }
         }
     });
-    electron_1.ipcMain.on('client.replace.get-available-languages', function (event, options) {
+    electron_1.ipcMain.on('client.get-available-languages', function (event, options) {
         var adapter = getAdapter(options);
         var languages = adapter.getAvailableLanguages(options.products);
-        event.sender.send('electron.replace.available-languages', languages);
+        event.sender.send('electron.available-languages', languages);
     });
-    electron_1.ipcMain.on('client.replace.convert', function (event, options) {
+    electron_1.ipcMain.on('client.convert', function (event, options) {
         try {
             var adapter = getAdapter(options);
             adapter.convert();

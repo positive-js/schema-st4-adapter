@@ -1,46 +1,6 @@
 <div fxLayout="column" fxFlexFill>
-    <div class="replacement__content" fxLayout="column" fxLayoutGap="24px"  fxFlex>
-        <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="space-between start">
-
-            <div fxFlex fxLayout="column" fxLayoutGap="24px" fxLayoutAlign="start stretch">
-                <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="space-between center">
-                    <file-loader fxFlex
-                                 title="Source"
-                                 [file]="source"
-                                 (onSelectFile)="onSelectSource()"
-                                 (onDropFile)="onDropSource($event)"
-                                 (onReset)="onResetSource()"></file-loader>
-
-                    <i class="material-icons">arrow_forward</i>
-                </div>
-
-                <replace-options [products]="sourceOptions.products"
-                                 [languages]="sourceOptions.languages"
-                                 [availableLanguages]="availableLanguages"
-                                 (onChangeProducts)="onChangeSourceProducts($event)"
-                                 (onChangeLanguages)="onChangeSourceLanguages($event)"
-                                 *ngIf="sourceOptions"></replace-options>
-            </div>
-
-            <div fxFlex fxLayout="column" fxLayoutGap="24px" fxLayoutAlign="start stretch">
-                <file-loader fxFlex
-                             title="Target"
-                             [file]="target"
-                             (onSelectFile)="onSelectTarget()"
-                             (onDropFile)="onDropTarget($event)"
-                             (onReset)="onResetTarget()"></file-loader>
-
-                <replace-options [products]="targetOptions.products"
-                                 [languages]="targetOptions.languages"
-                                 [availableLanguages]="availableLanguages"
-                                 (onChangeProducts)="onChangeTargetProducts($event)"
-                                 (onChangeLanguages)="onChangeTargetLanguages($event)"
-                                 *ngIf="targetOptions"></replace-options>
-            </div>
-
-        </div>
-
-
+    <div class="replacement__content" fxLayout="column" fxLayoutGap="24px" fxFlex fxFlexFill>
+        <conversion fxFlexFill (onChangeOptions)="onChangeConversionOptions($event)"></conversion>
     </div>
 
     <control-bar fxFlex="nogrow">

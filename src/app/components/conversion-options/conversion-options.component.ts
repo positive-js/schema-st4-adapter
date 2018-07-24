@@ -3,15 +3,15 @@ import indexOf from 'lodash-es/indexOf';
 import keys from 'lodash-es/keys';
 import remove from 'lodash-es/remove';
 
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 
 
 @Component({
-    selector: 'replace-options',
-    templateUrl: './replace-options.component.html',
-    styleUrls: ['./replace-options.component.scss']
+    selector: 'conversion-options',
+    templateUrl: './conversion-options.component.html',
+    styleUrls: ['./conversion-options.component.scss']
 })
-export class ReplaceOptionsComponent implements OnInit, OnChanges {
+export class ConversionOptionsComponent implements OnChanges {
     @Input()
     languages: string[];
     @Input()
@@ -32,9 +32,6 @@ export class ReplaceOptionsComponent implements OnInit, OnChanges {
     _selectedLanguages: any = {};
 
     constructor() {
-    }
-
-    ngOnInit() {
     }
 
     ngOnChanges(changes) {

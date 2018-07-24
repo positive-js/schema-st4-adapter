@@ -66,7 +66,7 @@ function getDialogFilter(side: OperationSideEnum, options: IAdapterOptions): any
 
 // tslint:disable-next-line max-func-body-length
 const registerWorkflow = (win) => {
-    ipcMain.on('client.replace.select-source', (event, options: IAdapterOptions) => {
+    ipcMain.on('client.select-source', (event, options: IAdapterOptions) => {
         if (!options.sourceFile) {
             const paths = dialog.showOpenDialog(
                 win,
@@ -114,7 +114,7 @@ const registerWorkflow = (win) => {
         }
     });
 
-    ipcMain.on('client.replace.select-target', (event, options: IAdapterOptions) => {
+    ipcMain.on('client.select-target', (event, options: IAdapterOptions) => {
         if (!options.targetFile) {
             options.targetFile = dialog.showSaveDialog(
                 win,
@@ -155,14 +155,14 @@ const registerWorkflow = (win) => {
         }
     });
 
-    ipcMain.on('client.replace.get-available-languages', (event, options: IAdapterOptions) => {
+    ipcMain.on('client.get-available-languages', (event, options: IAdapterOptions) => {
         const adapter = getAdapter(options);
         const languages = adapter.getAvailableLanguages(options.products);
 
-        event.sender.send('electron.replace.available-languages', languages);
+        event.sender.send('electron.available-languages', languages);
     });
 
-    ipcMain.on('client.replace.convert', (event, options: IAdapterOptions) => {
+    ipcMain.on('client.convert', (event, options: IAdapterOptions) => {
         try {
             const adapter: IAdapter = getAdapter(options);
 

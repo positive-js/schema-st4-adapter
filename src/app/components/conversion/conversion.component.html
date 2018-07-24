@@ -1,0 +1,39 @@
+<div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="space-between start" fxFlexFill>
+
+    <div fxFlex fxLayout="column" fxLayoutGap="24px" fxLayoutAlign="start stretch">
+        <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="space-between center">
+            <file-loader fxFlex
+                         header="Source"
+                         [file]="source"
+                         (onSelectFile)="onSelectSource()"
+                         (onDropFile)="onDropSource($event)"
+                         (onReset)="onResetSource()"></file-loader>
+
+            <i class="material-icons">arrow_forward</i>
+        </div>
+
+        <conversion-options [products]="sourceOptions.products"
+                         [languages]="sourceOptions.languages"
+                         [availableLanguages]="availableLanguages"
+                         (onChangeProducts)="onChangeSourceProducts($event)"
+                         (onChangeLanguages)="onChangeSourceLanguages($event)"
+                         *ngIf="sourceOptions"></conversion-options>
+    </div>
+
+    <div fxFlex fxLayout="column" fxLayoutGap="24px" fxLayoutAlign="start stretch">
+        <file-loader fxFlex
+                     header="Target"
+                     [file]="target"
+                     (onSelectFile)="onSelectTarget()"
+                     (onDropFile)="onDropTarget($event)"
+                     (onReset)="onResetTarget()"></file-loader>
+
+        <conversion-options [products]="targetOptions.products"
+                         [languages]="targetOptions.languages"
+                         [availableLanguages]="availableLanguages"
+                         (onChangeProducts)="onChangeTargetProducts($event)"
+                         (onChangeLanguages)="onChangeTargetLanguages($event)"
+                         *ngIf="targetOptions"></conversion-options>
+    </div>
+
+</div>

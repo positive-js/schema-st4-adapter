@@ -2,7 +2,7 @@
     position: relative;
     border: dashed 1px #b3b3b3;
     border-radius: 3px;
-    padding: 32px 16px;
+    padding: 16px;
 
     .material-icons {
         &:hover {
@@ -11,8 +11,16 @@
     }
 }
 
+.file-loader__data {
+
+}
+
 .file-loader__title {
     font-size: 24px;
+    margin-right: 62px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .file-loader__description {
@@ -25,10 +33,7 @@
     right: 20px;
 }
 
-.file-loader__placeholder {
-
-}
-
 .file-loader__link {
     color: #0089ff;
+    cursor: pointer;
 }
