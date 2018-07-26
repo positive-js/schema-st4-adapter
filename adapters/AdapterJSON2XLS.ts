@@ -16,7 +16,7 @@ class AdapterJSON2XLS extends BaseAdapterXLS implements IAdapter {
     }
 
     convert() {
-        const json = fs.readFileSync(this.options.targetFile, 'utf8');
+        const json = fs.readFileSync(this.options.sourceFile, 'utf8');
         const dataJSON = JSON.parse(json);
 
         const data = _.map(_.keys(dataJSON), (key) => {
@@ -34,7 +34,7 @@ class AdapterJSON2XLS extends BaseAdapterXLS implements IAdapter {
         const workbook = XLSX.utils.book_new();
 
         XLSX.utils.book_append_sheet(workbook, worksheet);
-        XLSX.writeFile(workbook, this.options.sourceFile);
+        XLSX.writeFile(workbook, this.options.targetFile);
     }
 
     getDiffs() {

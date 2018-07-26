@@ -24,7 +24,7 @@ var AdapterJSON2XLS = /** @class */ (function (_super) {
         return _this;
     }
     AdapterJSON2XLS.prototype.convert = function () {
-        var json = fs.readFileSync(this.options.targetFile, 'utf8');
+        var json = fs.readFileSync(this.options.sourceFile, 'utf8');
         var dataJSON = JSON.parse(json);
         var data = _.map(_.keys(dataJSON), function (key) {
             return [
@@ -37,7 +37,7 @@ var AdapterJSON2XLS = /** @class */ (function (_super) {
         var worksheet = XLSX.utils.aoa_to_sheet(data);
         var workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet);
-        XLSX.writeFile(workbook, this.options.sourceFile);
+        XLSX.writeFile(workbook, this.options.targetFile);
     };
     AdapterJSON2XLS.prototype.getDiffs = function () {
         var workbook = XLSX.readFile(this.options.targetFile);
