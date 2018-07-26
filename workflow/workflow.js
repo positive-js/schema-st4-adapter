@@ -211,7 +211,6 @@ var registerWorkflow = function (win) {
     electron_1.ipcMain.on('client.convert', function (event, options) {
         try {
             var adapter = getAdapter(options);
-            console.log(adapter);
             adapter.convert();
             electron_1.dialog.showMessageBox(win, {
                 type: 'info',
@@ -221,7 +220,6 @@ var registerWorkflow = function (win) {
             });
         }
         catch (e) {
-            console.log(e);
             electron_1.dialog.showMessageBox(win, {
                 type: 'error',
                 title: 'Error',

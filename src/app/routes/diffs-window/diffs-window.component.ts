@@ -81,12 +81,12 @@ export class DiffsWindowComponent implements OnInit {
 
     get isXLS() {
         const file = this.data.options.targetFile;
-        return file.substr(file.lastIndexOf('.') + 1) === FileTypeEnum.XLS;
+        return file && file.substr(file.lastIndexOf('.') + 1) === FileTypeEnum.XLS;
     }
 
     get isJSON() {
         const file = this.data.options.targetFile;
-        return file.substr(file.lastIndexOf('.') + 1) === FileTypeEnum.JSON;
+        return file && file.substr(file.lastIndexOf('.') + 1) === FileTypeEnum.JSON;
     }
 
     private getKeys() {
