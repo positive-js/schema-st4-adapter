@@ -1,0 +1,21 @@
+<header fxLayout="row" fxFlexFill fxLayoutAlign="space-between start" fxLayoutGap="16px">
+
+    <div fxFlex="nogrow"
+         class="diffs-header__checkbox-container"
+         *ngIf="showCheckbox">
+        <mc-checkbox [(ngModel)]="selectedAll"
+                     [indeterminate]="externalIndeterminate"
+                     (ngModelChange)="onChangeState()"></mc-checkbox>
+    </div>
+
+    <div fxFlex fxLayout="column">
+        <span>{{getFileName(sourceFile)}}</span>
+        <span class="diffs-header__path">{{getPath(sourceFile)}}</span>
+    </div>
+
+    <div fxFlex fxLayout="column">
+        <span>{{getFileName(targetFile)}}</span>
+        <span class="diffs-header__path">{{getPath(targetFile)}}</span>
+    </div>
+
+</header>

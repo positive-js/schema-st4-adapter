@@ -1,1 +1,20 @@
-<p (click)="testWindow()">TEST</p>
+<div fxLayout="column" fxFlexFill>
+    <div class="synchronization__content" fxLayout="column" fxLayoutGap="24px" fxFlex fxFlexFill>
+        <conversion fxFlexFill
+                    [operationType]="operationTypes.SYNCHRONIZATION"
+                    (onChangeOptions)="onChangeConversionOptions($event)"></conversion>
+    </div>
+
+    <control-bar fxFlex="nogrow">
+        <div class="control-bar__right">
+            <button mc-button
+                    color="primary"
+                    fxLayout
+                    fxLayoutAlign="space-between center"
+                    [disabled]="!canSynchronize()"
+                    (click)="synchronize()">
+                Synchronize
+            </button>
+        </div>
+    </control-bar>
+</div>

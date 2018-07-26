@@ -17,6 +17,9 @@ var BaseAdapterXML = /** @class */ (function () {
     BaseAdapterXML.prototype.synchronize = function () {
         //
     };
+    BaseAdapterXML.prototype.getDiffs = function () {
+        //
+    };
     BaseAdapterXML.prototype.getLanguages = function () {
         var xml = fs.readFileSync(this.getPathToBaseFile(), 'utf8');
         var document = new this.dom().parseFromString(xml);

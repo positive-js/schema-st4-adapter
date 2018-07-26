@@ -21,6 +21,10 @@ class BaseAdapterXML implements IAdapter {
         //
     }
 
+    getDiffs() {
+        //
+    }
+
     getLanguages(): string[] {
         const xml = fs.readFileSync(this.getPathToBaseFile(), 'utf8');
         const document = new this.dom().parseFromString(xml);

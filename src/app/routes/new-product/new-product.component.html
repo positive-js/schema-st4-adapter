@@ -1,0 +1,46 @@
+<div fxLayout="column" fxFlexFill>
+    <diffs-header fxFlex="nogrow"
+                  [sourceFile]="data.options.sourceFile"
+                  [targetFile]="data.options.targetFile"
+                  [showCheckbox]="false"></diffs-header>
+
+    <div class="new-product__content"
+         fxFlex
+         fxLayout="column"
+         fxLayoutGap="16px"
+         style="-webkit-app-region: no-drag;">
+
+        <div fxLayout="column" fxLayoutGap="8px">
+
+            <label for="productName" class="new-product__label">Product name</label>
+
+            <input id="productName" type="text" id class="new-product__input">
+        </div>
+
+        <div fxLayout="column" fxLayoutGap="8px">
+
+            <div class="new-product__header">Adding 12 values to a new product column in Excel file</div>
+
+
+        </div>
+
+
+    </div>
+
+    <control-bar fxFlex="nogrow">
+        <div class="control-bar__right">
+            <div fxLayout="row" fxLayoutGap="16px">
+                <button mc-button
+                        color="primary"
+                        (click)="add()">
+                    Add
+                </button>
+
+                <button mc-button
+                        (click)="back()">
+                    Back
+                </button>
+            </div>
+        </div>
+    </control-bar>
+</div>

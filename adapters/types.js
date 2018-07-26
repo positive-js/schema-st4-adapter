@@ -7,3 +7,9 @@ var FileTypeEnum;
     FileTypeEnum["JSON"] = "json";
 })(FileTypeEnum || (FileTypeEnum = {}));
 exports.FileTypeEnum = FileTypeEnum;
+var OperationType;
+(function (OperationType) {
+    OperationType["REPLACEMENT"] = "replacement";
+    OperationType["SYNCHRONIZATION"] = "synchronization";
+})(OperationType || (OperationType = {}));
+exports.OperationType = OperationType;

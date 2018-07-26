@@ -1,0 +1,101 @@
+<div fxLayout="column" fxLayoutAlign="start stretch">
+
+        <div fxFlex *ngIf="resources.replaced && objectKeys(resources.replaced.fromSource).length > 0">
+            <div fxLayout="row"
+                 fxLayoutGap="16px"
+                 fxLayoutAlign="space-between start">
+                <div fxFlex="48px">
+                    <mc-checkbox [(ngModel)]="stateReplacedKeys"
+                                 [indeterminate]="indeterminateReplacedKeys"
+                                 (ngModelChange)="selectReplaced()"></mc-checkbox>
+                </div>
+
+                <div class="diffs-content__header" fxFlex>
+                    Replace {{objectKeys(resources.replaced.fromSource).length}} changed values
+                </div>
+            </div>
+
+            <div class="diffs-content__row"
+                 fxLayout="row"
+                 fxLayoutGap="16px"
+                 fxLayoutAlign="space-between start"
+                 *ngFor="let key of objectKeys(resources.replaced.fromSource)">
+                <div fxFlex="48px" fxLayout fxLayoutAlign="end">
+                    <mc-checkbox [(ngModel)]="replaced[key]"
+                                 (ngModelChange)="onChangeItem()"></mc-checkbox>
+                </div>
+
+                <div fxFlex>
+                    {{resources.replaced.fromSource[key]}}
+                </div>
+
+                <div fxFlex>
+                    {{resources.replaced.toTarget[key]}}
+                </div>
+            </div>
+
+        </div>
+        <div fxFlex *ngIf="resources.added && objectKeys(resources.added).length > 0">
+            <div fxLayout="row"
+                 fxLayoutGap="16px"
+                 fxLayoutAlign="space-between start">
+                <div fxFlex="48px">
+                    <mc-checkbox [(ngModel)]="stateAddedKeys"
+                                 [indeterminate]="indeterminateAddedKeys"
+                                 (ngModelChange)="selectAdded()"></mc-checkbox>
+                </div>
+                <div class="diffs-content__header" fxFlex>
+                    Add {{objectKeys(resources.added).length}} new values
+                </div>
+            </div>
+
+            <div class="diffs-content__row"
+                 fxLayout="row"
+                 fxLayoutGap="16px"
+                 fxLayoutAlign="space-between start"
+                 *ngFor="let key of objectKeys(resources.added)">
+                <div fxFlex="48px" fxLayout fxLayoutAlign="end">
+                    <mc-checkbox [(ngModel)]="added[key]"
+                                 (ngModelChange)="onChangeItem()"></mc-checkbox>
+                </div>
+
+                <div fxFlex>
+                    {{resources.added[key]}}
+                </div>
+
+                <div fxFlex></div>
+            </div>
+        </div>
+        <div fxFlex *ngIf="resources.missed && objectKeys(resources.missed).length > 0">
+            <div fxLayout="row"
+                 fxLayoutGap="16px"
+                 fxLayoutAlign="space-between start">
+                <div fxFlex="48px">
+                    <mc-checkbox [(ngModel)]="stateMissedKeys"
+                                 [indeterminate]="indeterminateMissedKeys"
+                                 (ngModelChange)="selectMissed()"></mc-checkbox>
+                </div>
+                <div class="diffs-content__header" fxFlex>
+                    Keep {{objectKeys(resources.missed).length}} missing values in {{options.sourceFile}}
+                </div>
+            </div>
+
+            <div class="diffs-content__row"
+                 fxLayout="row"
+                 fxLayoutGap="16px"
+                 fxLayoutAlign="space-between start"
+                 *ngFor="let key of objectKeys(resources.missed)">
+                <div fxFlex="48px" fxLayout fxLayoutAlign="end">
+                    <mc-checkbox [(ngModel)]="missed[key]"
+                                 (ngModelChange)="onChangeItem()"></mc-checkbox>
+                </div>
+
+                <div fxFlex>-</div>
+
+                <div fxFlex>
+                    {{resources.missed[key]}}
+                </div>
+            </div>
+        </div>
+
+</div>

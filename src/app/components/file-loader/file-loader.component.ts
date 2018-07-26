@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 
-import { ExtensionsFileEnum } from '../../types';
+import { FileTypeEnum } from '../../types';
 
 
 @Component({
@@ -16,7 +16,7 @@ import { ExtensionsFileEnum } from '../../types';
         '(drop)': 'onDrop($event)'
     }
 })
-export class FileLoaderComponent implements OnInit {
+export class FileLoaderComponent {
     @Input()
     header: string;
 
@@ -34,9 +34,7 @@ export class FileLoaderComponent implements OnInit {
     onReset: EventEmitter<string> = new EventEmitter();
 
     constructor() {
-    }
-
-    ngOnInit() {
+        //
     }
 
     get filename() {
@@ -54,7 +52,7 @@ export class FileLoaderComponent implements OnInit {
             const file = event.dataTransfer.files[0];
             const extension = file.substr(file.lastIndexOf('.') + 1);
 
-            if (Object.values(ExtensionsFileEnum).includes(extension)) {
+            if (Object.values(FileTypeEnum).includes(extension)) {
                 this.onDropFile.emit(file.path);
             }
         }

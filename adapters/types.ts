@@ -1,7 +1,11 @@
 interface IAdapter {
     convert(): void;
 
-    synchronize(): void;
+    synchronize(keys?: any): any;
+
+    takeOut?(keys: any): any;
+
+    getDiffs(): any;
 
     getLanguages(): string[];
 
@@ -27,5 +31,9 @@ enum FileTypeEnum {
     JSON = 'json'
 }
 
+enum OperationType {
+    REPLACEMENT = 'replacement',
+    SYNCHRONIZATION = 'synchronization'
+}
 
-export { IAdapter, IAdapterOptions, FileTypeEnum };
+export { IAdapter, IAdapterOptions, FileTypeEnum, OperationType };

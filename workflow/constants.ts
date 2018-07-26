@@ -4,6 +4,11 @@ export const DIALOG_FILTERS = {
         extensions: ['xml', 'xls', 'json']
     },
 
+    ALL_FOR_SYNCHRONIZATION: {
+        name: 'Exported from Schema-ST4 XLS files or JSON files',
+        extensions: ['xls', 'json']
+    },
+
     ONLY_XML: {
         name: 'Exported from Schema-ST4 XML files',
         extensions: ['xml']

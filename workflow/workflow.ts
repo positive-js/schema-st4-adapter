@@ -1,5 +1,9 @@
-import { ipcMain, dialog } from 'electron';
+// tslint:disable underscore-consistent-invocation
+import { ipcMain, dialog, BrowserWindow } from 'electron';
 import * as _ from 'lodash'; // tslint:disable-line import-blacklist
+import * as path from 'path';
+import * as url from 'url';
+
 
 import {
     AdapterXLS2JSON,
@@ -8,7 +12,7 @@ import {
     IAdapterOptions,
     FileTypeEnum,
     AdapterJSON2XML,
-    AdapterJSON2XLS
+    AdapterJSON2XLS, OperationType
 } from '../adapters';
 
 import { DIALOG_FILTERS, OperationSideEnum } from './constants';
@@ -19,7 +23,7 @@ function getAdapter(options: IAdapterOptions): IAdapter {
     const extensionSource = options.sourceFile ? getExtension(options.sourceFile) : undefined;
     const extensionTarget = options.targetFile ? getExtension(options.targetFile) : undefined;
 
-    if (extensionSource === FileTypeEnum.XML && (extensionTarget === FileTypeEnum.JSON || !extensionTarget )) {
+    if (extensionSource === FileTypeEnum.XML && (extensionTarget === FileTypeEnum.JSON || !extensionTarget)) {
         return new AdapterXML2JSON(options);
     }
 
@@ -35,30 +39,46 @@ function getAdapter(options: IAdapterOptions): IAdapter {
         return new AdapterJSON2XLS(options);
     }
 
-    const extensionsExportedFromSchemaST4: string[] = [ FileTypeEnum.XML, FileTypeEnum.XLS ];
+    const extensionsExportedFromSchemaST4: string[] = [FileTypeEnum.XML, FileTypeEnum.XLS];
 
     if (_.indexOf(extensionsExportedFromSchemaST4, extensionSource) !== -1
-        && _.indexOf(extensionsExportedFromSchemaST4, extensionTarget)) {
+        && _.indexOf(extensionsExportedFromSchemaST4, extensionTarget) !== -1) {
         throw new Error('Probably both file are sources!');
     }
 
-    throw new Error('Adapter not found!');
+    // throw new Error('Adapter not found!');
 }
 
-function getDialogFilter(side: OperationSideEnum, options: IAdapterOptions): any {
+function getDialogFilter(operation: OperationType, side: OperationSideEnum, options: IAdapterOptions): any {
     const extensionSource = options.sourceFile ? getExtension(options.sourceFile) : undefined;
     const extensionTarget = options.targetFile ? getExtension(options.targetFile) : undefined;
 
-    if (side === OperationSideEnum.SOURCE) {
-        if (extensionTarget === FileTypeEnum.XML || extensionTarget === FileTypeEnum.XLS) {
-            return DIALOG_FILTERS.ONLY_JSON;
+    if (operation === OperationType.REPLACEMENT) {
+        if (side === OperationSideEnum.SOURCE) {
+            if (extensionTarget === FileTypeEnum.XML || extensionTarget === FileTypeEnum.XLS) {
+                return DIALOG_FILTERS.ONLY_JSON;
+            }
+        }
+
+        if (side === OperationSideEnum.TARGET) {
+            if (extensionSource === FileTypeEnum.XML || extensionSource === FileTypeEnum.XLS) {
+                return DIALOG_FILTERS.ONLY_JSON;
+            }
         }
     }
 
-    if (side === OperationSideEnum.TARGET) {
-        if (extensionSource === FileTypeEnum.XML || extensionSource === FileTypeEnum.XLS) {
+    if (operation === OperationType.SYNCHRONIZATION) {
+        if ((side === OperationSideEnum.SOURCE && extensionTarget === FileTypeEnum.XLS) ||
+            (side === OperationSideEnum.TARGET && extensionSource === FileTypeEnum.XLS)) {
             return DIALOG_FILTERS.ONLY_JSON;
         }
+
+        if ((side === OperationSideEnum.SOURCE && extensionTarget === FileTypeEnum.JSON) ||
+            (side === OperationSideEnum.TARGET && extensionSource === FileTypeEnum.JSON)) {
+            return DIALOG_FILTERS.ONLY_XLS;
+        }
+
+        return DIALOG_FILTERS.ALL_FOR_SYNCHRONIZATION;
     }
 
     return DIALOG_FILTERS.ALL;
@@ -66,13 +86,13 @@ function getDialogFilter(side: OperationSideEnum, options: IAdapterOptions): any
 
 // tslint:disable-next-line max-func-body-length
 const registerWorkflow = (win) => {
-    ipcMain.on('client.select-source', (event, options: IAdapterOptions) => {
+    ipcMain.on('client.replacement.select-source', (event, options: IAdapterOptions) => {
         if (!options.sourceFile) {
             const paths = dialog.showOpenDialog(
                 win,
                 {
                     filters: [
-                        getDialogFilter(OperationSideEnum.SOURCE, options)
+                        getDialogFilter(OperationType.REPLACEMENT, OperationSideEnum.SOURCE, options)
                     ],
                     properties: [
                         'openFile'
@@ -114,13 +134,13 @@ const registerWorkflow = (win) => {
         }
     });
 
-    ipcMain.on('client.select-target', (event, options: IAdapterOptions) => {
+    ipcMain.on('client.replacement.select-target', (event, options: IAdapterOptions) => {
         if (!options.targetFile) {
             options.targetFile = dialog.showSaveDialog(
                 win,
                 {
                     filters: [
-                        getDialogFilter(OperationSideEnum.TARGET, options)
+                        getDialogFilter(OperationType.REPLACEMENT, OperationSideEnum.TARGET, options)
                     ]
                 }
             );
@@ -144,6 +164,99 @@ const registerWorkflow = (win) => {
             }
 
             if (extension === FileTypeEnum.XML || extension === FileTypeEnum.XLS) {
+                const languages = adapter.getLanguages();
+                const products = adapter.getProducts();
+
+                event.sender.send('electron.target.options-loaded', {
+                    languages,
+                    products
+                });
+            }
+        }
+    });
+
+    ipcMain.on('client.synchronization.select-source', (event, options: IAdapterOptions) => {
+        if (!options.sourceFile) {
+            const paths = dialog.showOpenDialog(
+                win,
+                {
+                    filters: [
+                        getDialogFilter(OperationType.SYNCHRONIZATION, OperationSideEnum.SOURCE, options)
+                    ],
+                    properties: [
+                        'openFile'
+                    ]
+                }
+            );
+
+            if (paths && paths.length > 0) {
+                options.sourceFile = paths[0];
+            }
+        }
+
+        if (options.sourceFile) {
+            const extension = getExtension(options.sourceFile);
+            const pathToSourceFile = getPath(options.sourceFile);
+            const name = getFileName(options.sourceFile);
+            const adapter: IAdapter = getAdapter(options);
+
+            event.sender.send('electron.source-loaded', {
+                fullPath: options.sourceFile,
+                path: pathToSourceFile,
+                extension,
+                name
+            });
+
+            if (!adapter) {
+                return;
+            }
+
+            if (extension === FileTypeEnum.XLS) {
+                const languages = adapter.getLanguages();
+                const products = adapter.getProducts();
+
+                event.sender.send('electron.source.options-loaded', {
+                    languages,
+                    products
+                });
+            }
+        }
+    });
+
+    ipcMain.on('client.synchronization.select-target', (event, options: IAdapterOptions) => {
+        if (!options.targetFile) {
+            const paths = dialog.showOpenDialog(
+                win,
+                {
+                    filters: [
+                        getDialogFilter(OperationType.SYNCHRONIZATION, OperationSideEnum.TARGET, options)
+                    ]
+                }
+            );
+
+            if (paths && paths.length > 0) {
+                options.targetFile = paths[0];
+            }
+        }
+
+        if (options.targetFile) {
+            const extension = getExtension(options.targetFile);
+            const pathToTargetFile = getPath(options.targetFile);
+            const name = getFileName(options.targetFile);
+            const adapter = getAdapter(options);
+
+            event.sender.send('electron.target-loaded', {
+                fullPath: options.targetFile,
+                path: pathToTargetFile,
+                extension,
+                name
+            });
+
+            if (!adapter) {
+                return;
+            }
+
+            if (extension === FileTypeEnum.XLS) {
                 const languages = adapter.getLanguages();
                 const products = adapter.getProducts();
 
@@ -179,6 +292,128 @@ const registerWorkflow = (win) => {
                 type: 'error',
                 title: 'Error',
                 message: `An error occurred while converting the file: ${e.message}`,
+                buttons: ['Close']
+            });
+        }
+    });
+
+    let sharedDiffsData;
+    let windowDiff;
+    let windowNewProduct;
+
+    ipcMain.on('client.synchronize', (event, options: IAdapterOptions) => {
+        try {
+            const adapter: IAdapter = getAdapter(options);
+
+            const diffs = adapter.getDiffs();
+
+            if (!diffs) {
+                dialog.showMessageBox(win, {
+                    type: 'info',
+                    title: 'Success',
+                    message: 'Source and target are already synchronized!',
+                    buttons: ['OK']
+                });
+
+                return;
+            }
+
+            windowDiff = new BrowserWindow({ parent: win, modal: true, show: false, frame: false });
+
+            windowDiff.loadURL(url.format({
+                pathname: path.join(__dirname, '../dist/index.html'),
+                protocol: 'file:',
+                slashes: true,
+                hash: 'diffs'
+            }));
+
+            sharedDiffsData = {
+                options,
+                resources: diffs
+            };
+
+            windowDiff.once('ready-to-show', () => {
+                windowDiff.show();
+            });
+        } catch (e) {
+            dialog.showMessageBox(win, {
+                type: 'error',
+                title: 'Error',
+                message: `An error occurred while synchronization the file: ${e.message}`,
+                buttons: ['Close']
+            });
+        }
+    });
+
+    ipcMain.on('client.diffs.get-resources', (event) => {
+        event.sender.send('electron.diffs.resources', sharedDiffsData);
+    });
+
+    ipcMain.on('client.diffs.apply', (event, keys: any) => {
+        try {
+            const adapter: IAdapter = getAdapter(sharedDiffsData.options);
+
+            const result = adapter.synchronize(keys);
+
+            if (result === true) {
+                windowDiff.close();
+                sharedDiffsData = undefined;
+
+                dialog.showMessageBox(win, {
+                    type: 'info',
+                    title: 'Success',
+                    message: 'The file was successfully converted!',
+                    buttons: ['OK']
+                });
+            }
+        } catch(e) {
+            dialog.showMessageBox(win, {
+                type: 'error',
+                title: 'Error',
+                message: `An error occurred while synchronization the file: ${e.message}`,
+                buttons: ['Close']
+            });
+        }
+    });
+
+    ipcMain.on('client.diffs.cancel', (event, keys: any) => {
+        windowDiff.close();
+        sharedDiffsData = undefined;
+    });
+
+    ipcMain.on('client.diffs.add-to-new-product', (event, keys: any) => {
+        try {
+            const adapter: IAdapter = getAdapter(sharedDiffsData.options);
+            const extensionTarget = getExtension(sharedDiffsData.options.targetFile);
+
+            if (extensionTarget === FileTypeEnum.JSON) {
+                if (adapter.takeOut) {
+                    adapter.takeOut(keys);
+                }
+            }
+
+            if (extensionTarget === FileTypeEnum.XLS) {
+                windowNewProduct = new BrowserWindow({ parent: windowDiff, modal: true, show: false, frame: false });
+
+                windowNewProduct.loadURL(url.format({
+                    pathname: path.join(__dirname, '../dist/index.html'),
+                    protocol: 'file:',
+                    slashes: true,
+                    hash: 'new-product'
+                }));
+
+                sharedDiffsData.keys = keys;
+
+                windowNewProduct.once('ready-to-show', () => {
+                    windowDiff.show();
+                });
+            }
+
+        } catch(e) {
+            dialog.showMessageBox(win, {
+                type: 'error',
+                title: 'Error',
+                message: `An error occurred while take out the file: ${e.message}`,
                 buttons: ['Close']
             });
         }

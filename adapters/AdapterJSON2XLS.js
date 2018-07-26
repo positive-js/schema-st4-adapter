@@ -39,8 +39,72 @@ var AdapterJSON2XLS = /** @class */ (function (_super) {
         XLSX.utils.book_append_sheet(workbook, worksheet);
         XLSX.writeFile(workbook, this.options.sourceFile);
     };
-    AdapterJSON2XLS.prototype.synchronize = function () {
-        //
+    AdapterJSON2XLS.prototype.getDiffs = function () {
+        var workbook = XLSX.readFile(this.options.targetFile);
+        var worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        var worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+        var product = this.options.products[0];
+        var resourcesXLS = _.reduce(worksheetJSON, function (resources, current) {
+            resources[current.__EMPTY] = current[product];
+            return resources;
+        }, {});
+        var keysXLS = _.keys(resourcesXLS);
+        var resourcesJSON = JSON.parse(fs.readFileSync(this.options.sourceFile, { encoding: 'utf8' }));
+        var keysJSON = _.keys(resourcesJSON);
+        var replaced = _.filter(_.intersection(keysXLS, keysJSON), function (key) { return resourcesJSON[key] != resourcesXLS[key]; });
+        var missed = _.difference(keysXLS, keysJSON);
+        var added = _.difference(keysJSON, keysXLS);
+        return replaced.concat(missed, added).length > 0
+            ? {
+                replaced: {
+                    fromSource: _.pick(resourcesJSON, replaced),
+                    toTarget: _.pick(resourcesXLS, replaced)
+                },
+                added: _.pick(resourcesJSON, added),
+                missed: _.pick(resourcesXLS, missed)
+            }
+            : null;
+    };
+    AdapterJSON2XLS.prototype.synchronize = function (keys) {
+        if (keys === void 0) { keys = {}; }
+        var workbook = XLSX.readFile(this.options.targetFile);
+        var worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        var worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+        var product = this.options.products[0];
+        var resourcesXLS = _.reduce(worksheetJSON, function (resources, current) {
+            resources[current.__EMPTY] = current[product];
+            return resources;
+        }, {});
+        var keysXLS = _.keys(resourcesXLS);
+        var resourcesJSON = JSON.parse(fs.readFileSync(this.options.sourceFile, { encoding: 'utf8' }));
+        var keysJSON = _.keys(resourcesJSON);
+        // replaced
+        for (var _i = 0, _a = keys.replaced; _i < _a.length; _i++) {
+            var key = _a[_i];
+            resourcesXLS[key] = resourcesJSON[key];
+        }
+        // added
+        for (var _b = 0, _c = keys.added; _b < _c.length; _b++) {
+            var key = _c[_b];
+            resourcesXLS[key] = resourcesJSON[key];
+        }
+        // missed
+        var allMissed = _.difference(keysXLS, keysJSON);
+        var removed = _.difference(allMissed, keys.missed);
+        resourcesXLS = _.omit(resourcesXLS, removed);
+        var data = _.map(_.keys(resourcesXLS), function (key) {
+            return [
+                key,
+                resourcesXLS[key]
+            ];
+        });
+        // manual format header
+        data.unshift([undefined, this.options.products[0]]);
+        var worksheetNew = XLSX.utils.aoa_to_sheet(data);
+        var workbookNew = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbookNew, worksheetNew);
+        XLSX.writeFile(workbookNew, this.options.targetFile);
+        return true;
     };
     return AdapterJSON2XLS;
 }(BaseAdapterXLS_1.BaseAdapterXLS));

@@ -9,7 +9,7 @@ import { ElectronService } from '../../providers/electron.service';
     styleUrls: ['./replacement.component.scss'],
     encapsulation: ViewEncapsulation.None,
     host: {
-        class: 'replacement'
+        class: 'REPLACEMENT'
     }
 })
 export class ReplacementComponent {

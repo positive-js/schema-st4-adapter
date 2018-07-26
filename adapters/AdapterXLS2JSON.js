@@ -46,8 +46,65 @@ var AdapterXLS2JSON = /** @class */ (function (_super) {
             _loop_1(product);
         }
     };
-    AdapterXLS2JSON.prototype.synchronize = function () {
-        //
+    AdapterXLS2JSON.prototype.getDiffs = function () {
+        var workbook = XLSX.readFile(this.options.sourceFile);
+        var worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        var worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+        var product = this.options.products[0];
+        var resourcesXLS = _.reduce(worksheetJSON, function (resources, current) {
+            resources[current.__EMPTY] = current[product];
+            return resources;
+        }, {});
+        var keysXLS = _.keys(resourcesXLS);
+        var resourcesJSON = JSON.parse(fs.readFileSync(this.options.targetFile, { encoding: 'utf8' }));
+        var keysJSON = _.keys(resourcesJSON);
+        var replaced = _.filter(_.intersection(keysXLS, keysJSON), function (key) { return resourcesJSON[key] != resourcesXLS[key]; });
+        var added = _.difference(keysXLS, keysJSON);
+        var missed = _.difference(keysJSON, keysXLS);
+        return replaced.concat(missed, added).length > 0
+            ? {
+                replaced: {
+                    fromSource: _.pick(resourcesXLS, replaced),
+                    toTarget: _.pick(resourcesJSON, replaced)
+                },
+                added: _.pick(resourcesXLS, added),
+                missed: _.pick(resourcesJSON, missed)
+            }
+            : null;
+    };
+    AdapterXLS2JSON.prototype.synchronize = function (keys) {
+        if (keys === void 0) { keys = {}; }
+        var workbook = XLSX.readFile(this.options.sourceFile);
+        var worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        var worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+        var product = this.options.products[0];
+        var resourcesXLS = _.reduce(worksheetJSON, function (resources, current) {
+            resources[current.__EMPTY] = current[product];
+            return resources;
+        }, {});
+        var keysXLS = _.keys(resourcesXLS);
+        var resourcesJSON = JSON.parse(fs.readFileSync(this.options.targetFile, { encoding: 'utf8' }));
+        var keysJSON = _.keys(resourcesJSON);
+        // replaced
+        for (var _i = 0, _a = keys.replaced; _i < _a.length; _i++) {
+            var key = _a[_i];
+            resourcesJSON[key] = resourcesXLS[key];
+        }
+        // added
+        for (var _b = 0, _c = keys.added; _b < _c.length; _b++) {
+            var key = _c[_b];
+            resourcesJSON[key] = resourcesXLS[key];
+        }
+        // missed
+        var allMissed = _.difference(keysJSON, keysXLS);
+        for (var _d = 0, allMissed_1 = allMissed; _d < allMissed_1.length; _d++) {
+            var key = allMissed_1[_d];
+            var removed = _.difference(allMissed, keys.missed);
+            resourcesJSON = _.omit(resourcesJSON, removed);
+        }
+        var contentFile = JSON.stringify(resourcesJSON, null, COUNT_SPACES_INDENT_JSON);
+        fs.writeFileSync(this.options.targetFile, contentFile, { encoding: 'utf8' });
+        return true;
     };
     return AdapterXLS2JSON;
 }(BaseAdapterXLS_1.BaseAdapterXLS));

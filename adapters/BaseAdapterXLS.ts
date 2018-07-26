@@ -20,12 +20,16 @@ class BaseAdapterXLS implements IAdapter {
         //
     }
 
+    getDiffs() {
+        //
+    }
+
     getLanguages() {
         return [];
     }
 
     getProducts() {
-        const workbook = XLSX.readFile(this.options.sourceFile);
+        const workbook = XLSX.readFile(this.getPathToBaseFile());
         const worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
         const worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
 
@@ -34,6 +38,12 @@ class BaseAdapterXLS implements IAdapter {
 
     getAvailableLanguages(products: string[]) {
         return this.getLanguages();
+    }
+
+    private getPathToBaseFile() {
+        return this.side === OperationSideEnum.SOURCE
+            ? this.options.sourceFile
+            : this.options.targetFile;
     }
 }
 

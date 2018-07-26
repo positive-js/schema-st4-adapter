@@ -1,0 +1,42 @@
+<div fxLayout="column" fxFlexFill>
+    <diffs-header fxFlex="nogrow"
+                  [sourceFile]="data.options.sourceFile"
+                  [targetFile]="data.options.targetFile"
+                  [externalSelectedAll]="selectedAllForHeader"
+                  [externalIndeterminate]="indeterminateAllForHeader"
+                  (onChangeSelectedAll)="onChangeSelectedAllFromHeader($event)"></diffs-header>
+
+    <div fxFlex fxLayout="row" style="-webkit-app-region: no-drag;">
+
+        <diffs-content fxFlexFill
+                       [resources]="data.resources"
+                       [externalSelectedAll]="selectedAllForContent"
+                       [options]="data.options"
+                       (onChangeSelection)="onChangeSelection($event)"
+                       (onChangeSelectedAll)="onChangeSelectedAllFromContent($event)"
+                       (onChangeIndeterminate)="onChangeIndeterminateFromContent($event)"></diffs-content>
+    </div>
+
+    <control-bar fxFlex="nogrow">
+        <div class="control-bar__left">
+            <button mc-button (click)="addTonewProduct()">
+                Add selected to a new product
+            </button>
+        </div>
+
+        <div class="control-bar__right">
+            <div fxLayout="row" fxLayoutGap="16px">
+                <button mc-button
+                        color="primary"
+                        (click)="synchronize()">
+                    Sync selected
+                </button>
+
+                <button mc-button
+                        (click)="cancel()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </control-bar>
+</div>

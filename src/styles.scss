@@ -1,7 +1,8 @@
+@import '~@ptsecurity/mosaic-icons/dist/styles/mc-icons.css';
 @import '~@ptsecurity/mosaic/prebuilt-themes/default-theme.css';
 @import '~material-design-icons/iconfont/material-icons.css';
 
-/* You can add global styles to this file, and also import other style files */
+
 html, body {
     margin: 0;
     padding: 0;
@@ -9,6 +10,11 @@ html, body {
     height: 100%;
 
     color: #4d4d4d;
+
+    //font-family: Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.33;
+    letter-spacing: 0.2px;
 }
 
 * {

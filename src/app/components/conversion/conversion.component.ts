@@ -1,6 +1,7 @@
-import { Component, EventEmitter, NgZone, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
 
 import { ElectronService } from '../../providers/electron.service';
+import { OperationType } from '../../types';
 
 
 @Component({
@@ -9,6 +10,9 @@ import { ElectronService } from '../../providers/electron.service';
     styleUrls: ['./conversion.component.scss']
 })
 export class ConversionComponent implements OnInit {
+
+    @Input()
+    operationType: OperationType  = OperationType.REPLACEMENT;
 
     @Output()
     onChangeOptions: EventEmitter<any> = new EventEmitter<any>();
@@ -78,7 +82,7 @@ export class ConversionComponent implements OnInit {
 
         options.sourceFile = null;
 
-        this.electronService.ipcRenderer.send('client.select-source', options);
+        this.electronService.ipcRenderer.send(`client.${this.operationType}.select-source`, options);
     }
 
     onDropSource(file) {
@@ -87,7 +91,7 @@ export class ConversionComponent implements OnInit {
             options.sourceFile = file;
         }
 
-        this.electronService.ipcRenderer.send('client.select-source', options);
+        this.electronService.ipcRenderer.send(`client.${this.operationType}.select-source`, options);
     }
 
     onSelectTarget() {
@@ -95,7 +99,7 @@ export class ConversionComponent implements OnInit {
 
         options.targetFile = null;
 
-        this.electronService.ipcRenderer.send('client.select-target', options);
+        this.electronService.ipcRenderer.send(`client.${this.operationType}.select-target`, options);
     }
 
     onDropTarget(file) {
@@ -104,7 +108,7 @@ export class ConversionComponent implements OnInit {
             options.targetFile = file;
         }
 
-        this.electronService.ipcRenderer.send('client.select-target', options);
+        this.electronService.ipcRenderer.send(`client.${this.operationType}.select-target`, options);
     }
 
     onResetSource() {

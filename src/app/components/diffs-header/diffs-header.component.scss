@@ -1,0 +1,16 @@
+.diffs-header {
+    height: 60px;
+    padding: 12px 16px;
+    background-color: #f0f0f0;
+    -webkit-app-region: drag;
+}
+
+.diffs-header__checkbox-container {
+    width: 48px;
+    -webkit-app-region: no-drag;
+}
+
+.diffs-header__path {
+    font-size: 13px;
+    color: #999999;
+}
