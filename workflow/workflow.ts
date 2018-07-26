@@ -318,7 +318,7 @@ const registerWorkflow = (win) => {
                 return;
             }
 
-            windowDiff = new BrowserWindow({ parent: win, modal: true, show: false, frame: false });
+            windowDiff = new BrowserWindow({parent: win, modal: true, show: false, frame: false});
 
             windowDiff.loadURL(url.format({
                 pathname: path.join(__dirname, '../dist/index.html'),
@@ -362,11 +362,11 @@ const registerWorkflow = (win) => {
                 dialog.showMessageBox(win, {
                     type: 'info',
                     title: 'Success',
-                    message: 'The file was successfully converted!',
+                    message: 'The file was successfully synchronized!',
                     buttons: ['OK']
                 });
             }
-        } catch(e) {
+        } catch (e) {
             dialog.showMessageBox(win, {
                 type: 'error',
                 title: 'Error',
@@ -376,24 +376,21 @@ const registerWorkflow = (win) => {
         }
     });
 
-    ipcMain.on('client.diffs.cancel', (event, keys: any) => {
+    ipcMain.on('client.diffs.cancel', () => {
         windowDiff.close();
         sharedDiffsData = undefined;
     });
 
+    ipcMain.on('client.diffs.add-to-new-product.cancel', () => {
+        windowNewProduct.close();
+    });
+
     ipcMain.on('client.diffs.add-to-new-product', (event, keys: any) => {
         try {
-            const adapter: IAdapter = getAdapter(sharedDiffsData.options);
             const extensionTarget = getExtension(sharedDiffsData.options.targetFile);
 
-            if (extensionTarget === FileTypeEnum.JSON) {
-                if (adapter.takeOut) {
-                    adapter.takeOut(keys);
-                }
-            }
-
             if (extensionTarget === FileTypeEnum.XLS) {
-                windowNewProduct = new BrowserWindow({ parent: windowDiff, modal: true, show: false, frame: false });
+                windowNewProduct = new BrowserWindow({parent: windowDiff, modal: true, show: false, frame: false});
 
                 windowNewProduct.loadURL(url.format({
                     pathname: path.join(__dirname, '../dist/index.html'),
@@ -405,11 +402,11 @@ const registerWorkflow = (win) => {
                 sharedDiffsData.keys = keys;
 
                 windowNewProduct.once('ready-to-show', () => {
-                    windowDiff.show();
+                    windowNewProduct.show();
                 });
             }
 
-        } catch(e) {
+        } catch (e) {
             dialog.showMessageBox(win, {
                 type: 'error',
                 title: 'Error',
@@ -418,6 +415,54 @@ const registerWorkflow = (win) => {
             });
         }
     });
+
+    ipcMain.on('client.diffs.add-to-new-product.apply', (event, keys: any, newProductName?) => {
+        try {
+            const adapter: IAdapter = getAdapter(sharedDiffsData.options);
+            const extensionTarget = getExtension(sharedDiffsData.options.targetFile);
+
+            let result;
+
+            if (extensionTarget === FileTypeEnum.JSON) {
+                const  filename = dialog.showSaveDialog(
+                    win,
+                    {
+                        filters: [
+                            DIALOG_FILTERS.ONLY_JSON
+                        ]
+                    }
+                );
+
+                result = adapter.takeOut(keys, filename);
+            }
+
+            if (newProductName && keys && adapter.takeOut) {
+                result = adapter.takeOut(keys, newProductName);
+            }
+
+            if (result === true) {
+                if (windowNewProduct) {
+                    windowNewProduct.close();
+                }
+
+                dialog.showMessageBox(win, {
+                    type: 'info',
+                    title: 'Success',
+                    message: 'The file was saved successfully!',
+                    buttons: ['OK']
+                });
+            }
+
+        } catch (e) {
+            dialog.showMessageBox(win, {
+                type: 'error',
+                title: 'Error',
+                message: `An error occurred while take out the file: ${e.message}`,
+                buttons: ['Close']
+            });
+        }
+    });
+
 };
 
 export { registerWorkflow };

@@ -3,6 +3,7 @@ import pickBy from 'lodash-es/pickBy';
 import keys from 'lodash-es/keys';
 
 import { ElectronService } from '../../providers/electron.service';
+import { FileTypeEnum } from '../../types';
 
 
 @Component({
@@ -60,9 +61,32 @@ export class DiffsWindowComponent implements OnInit {
         this.electronService.ipcRenderer.send('client.diffs.cancel');
     }
 
-    addTonewProduct() {
+    addToNewProduct() {
         const keys = this.getKeys();
         this.electronService.ipcRenderer.send('client.diffs.add-to-new-product', keys);
+    }
+
+    addToNewFile() {
+        const keys = this.getKeys();
+        this.electronService.ipcRenderer.send('client.diffs.add-to-new-product.apply', keys);
+    }
+
+    canAddToNewProduct() {
+        const keys = this.getKeys();
+
+        return keys.replaced && keys.replaced.length > 0 &&
+            keys.added && keys.added.length > 0 &&
+            keys.missed && keys.missed.length > 0;
+    }
+
+    get isXLS() {
+        const file = this.data.options.targetFile;
+        return file.substr(file.lastIndexOf('.') + 1) === FileTypeEnum.XLS;
+    }
+
+    get isJSON() {
+        const file = this.data.options.targetFile;
+        return file.substr(file.lastIndexOf('.') + 1) === FileTypeEnum.JSON;
     }
 
     private getKeys() {

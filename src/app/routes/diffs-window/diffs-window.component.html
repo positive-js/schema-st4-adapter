@@ -19,8 +19,18 @@
 
     <control-bar fxFlex="nogrow">
         <div class="control-bar__left">
-            <button mc-button (click)="addTonewProduct()">
+            <button mc-button
+                    *ngIf="isXLS"
+                    [disabled]="!canAddToNewProduct()"
+                    (click)="addToNewProduct()">
                 Add selected to a new product
+            </button>
+
+            <button mc-button
+                    *ngIf="isJSON"
+                    [disabled]="!canAddToNewProduct()"
+                    (click)="addToNewFile()">
+                Add selected to a new file
             </button>
         </div>
 

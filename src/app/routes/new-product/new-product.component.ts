@@ -1,4 +1,4 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, Input, NgZone, OnInit } from '@angular/core';
 
 import { ElectronService } from '../../providers/electron.service';
 
@@ -10,7 +10,11 @@ import { ElectronService } from '../../providers/electron.service';
 })
 export class NewProductComponent implements OnInit {
 
-    data: any;
+    @Input()
+    data: any = {};
+
+    productName: string;
+
 
     constructor(private electronService: ElectronService, private zone: NgZone) {
     }
@@ -26,14 +30,18 @@ export class NewProductComponent implements OnInit {
     }
 
     add() {
-
+        this.electronService.ipcRenderer.send('client.diffs.add-to-new-product.apply', this.data.keys, this.productName);
     }
 
     back() {
-
+        this.electronService.ipcRenderer.send('client.diffs.add-to-new-product.cancel');
     }
 
-    get allKeys() {
-        return [...this.data.keys.replaced, ...this.data.keys.added, ...this.data.keys.missed];
+    get countResources() {
+        return this.data.keys.replaced.length + this.data.keys.added.length + this.data.keys.missed.length;
+    }
+
+    get canAdd() {
+        return this.productName;
     }
 }

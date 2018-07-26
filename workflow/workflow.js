@@ -281,7 +281,7 @@ var registerWorkflow = function (win) {
                 electron_1.dialog.showMessageBox(win, {
                     type: 'info',
                     title: 'Success',
-                    message: 'The file was successfully converted!',
+                    message: 'The file was successfully synchronized!',
                     buttons: ['OK']
                 });
             }
@@ -295,19 +295,16 @@ var registerWorkflow = function (win) {
             });
         }
     });
-    electron_1.ipcMain.on('client.diffs.cancel', function (event, keys) {
+    electron_1.ipcMain.on('client.diffs.cancel', function () {
         windowDiff.close();
         sharedDiffsData = undefined;
     });
+    electron_1.ipcMain.on('client.diffs.add-to-new-product.cancel', function () {
+        windowNewProduct.close();
+    });
     electron_1.ipcMain.on('client.diffs.add-to-new-product', function (event, keys) {
         try {
-            var adapter = getAdapter(sharedDiffsData.options);
             var extensionTarget = utils_1.getExtension(sharedDiffsData.options.targetFile);
-            if (extensionTarget === adapters_1.FileTypeEnum.JSON) {
-                if (adapter.takeOut) {
-                    adapter.takeOut(keys);
-                }
-            }
             if (extensionTarget === adapters_1.FileTypeEnum.XLS) {
                 windowNewProduct = new electron_1.BrowserWindow({ parent: windowDiff, modal: true, show: false, frame: false });
                 windowNewProduct.loadURL(url.format({
@@ -318,7 +315,42 @@ var registerWorkflow = function (win) {
                 }));
                 sharedDiffsData.keys = keys;
                 windowNewProduct.once('ready-to-show', function () {
-                    windowDiff.show();
+                    windowNewProduct.show();
+                });
+            }
+        }
+        catch (e) {
+            electron_1.dialog.showMessageBox(win, {
+                type: 'error',
+                title: 'Error',
+                message: "An error occurred while take out the file: " + e.message,
+                buttons: ['Close']
+            });
+        }
+    });
+    electron_1.ipcMain.on('client.diffs.add-to-new-product.apply', function (event, keys, newProductName) {
+        try {
+            var adapter = getAdapter(sharedDiffsData.options);
+            var extensionTarget = utils_1.getExtension(sharedDiffsData.options.targetFile);
+            var result = void 0;
+            if (extensionTarget === adapters_1.FileTypeEnum.JSON) {
+                var filename = electron_1.dialog.showSaveDialog(win, {
+                    filters: [
+                        constants_1.DIALOG_FILTERS.ONLY_JSON
+                    ]
+                });
+                result = adapter.takeOut(keys, filename);
+            }
+            if (newProductName && keys && adapter.takeOut) {
+                result = adapter.takeOut(keys, newProductName);
+            }
+            if (result === true) {
+                windowNewProduct.close();
+                electron_1.dialog.showMessageBox(win, {
+                    type: 'info',
+                    title: 'Success',
+                    message: 'The file was saved successfully!',
+                    buttons: ['OK']
                 });
             }
         }

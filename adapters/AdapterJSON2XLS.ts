@@ -72,43 +72,115 @@ class AdapterJSON2XLS extends BaseAdapterXLS implements IAdapter {
     synchronize(keys: any = {}) {
         const workbook = XLSX.readFile(this.options.targetFile);
         const worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
-        const worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+        let worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
 
         const product = this.options.products[0];
-        let resourcesXLS = _.reduce(worksheetJSON, (resources, current: any) => {
-            resources[current.__EMPTY] = current[product];
 
-            return resources;
-        }, {});
-        const keysXLS = _.keys(resourcesXLS);
+        const keysXLS = _.map(worksheetJSON, (row) => row.__EMPTY);
 
         let resourcesJSON = JSON.parse(fs.readFileSync(this.options.sourceFile, { encoding: 'utf8'}));
         const keysJSON = _.keys(resourcesJSON);
 
         // replaced
         for (const key of keys.replaced) {
-            resourcesXLS[key] = resourcesJSON[key];
+            const foundRow = _.find(worksheetJSON, (row) => row.__EMPTY == key);
+            foundRow[product] = resourcesJSON[key];
         }
 
         // added
         for(const key of keys.added) {
-            resourcesXLS[key] = resourcesJSON[key];
+            const addedRow = _.zipObject(_.keys(worksheetJSON[0]), []);
+            addedRow.__EMPTY = key;
+            addedRow[product] = resourcesJSON[key];
+
+            worksheetJSON.push(addedRow);
         }
 
         // missed
         const allMissed = _.difference(keysXLS, keysJSON);
         const removed = _.difference(allMissed, keys.missed);
-        resourcesXLS = _.omit(resourcesXLS, removed);
+        worksheetJSON = _.filter(worksheetJSON, (row) => _.indexOf(removed, row.__EMPTY) === -1);
 
-        const data = _.map(_.keys(resourcesXLS), (key) => {
-            return [
-                key,
-                resourcesXLS[key]
-            ];
+        const data = [];
+        const products = _.filter(_.keys(worksheetJSON[0]), (key) => key !== '__EMPTY');
+
+        data.push([
+            undefined,
+            ...products
+        ]);
+
+        for (const row of worksheetJSON) {
+            data.push([
+                row['__EMPTY'],
+                ..._.map(products, (product) => row[product])
+            ]);
+        }
+
+        const worksheetNew = XLSX.utils.aoa_to_sheet(data);
+        const workbookNew = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(workbookNew, worksheetNew);
+        XLSX.writeFile(workbookNew, this.options.targetFile);
+
+        return true;
+    }
+
+    takeOut(keys: any = {}, newProductName: string) {
+        const workbook = XLSX.readFile(this.options.targetFile);
+        const worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        let worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+
+        const product = this.options.products[0];
+
+        const keysXLS = _.map(worksheetJSON, (row) => row.__EMPTY);
+
+        let resourcesJSON = JSON.parse(fs.readFileSync(this.options.sourceFile, { encoding: 'utf8'}));
+        const keysJSON = _.keys(resourcesJSON);
+
+        worksheetJSON = _.map(worksheetJSON, (row) => {
+            row[newProductName] = '';
+            return row;
         });
 
-        // manual format header
-        data.unshift([undefined, this.options.products[0]]);
+        // replaced
+        for (const key of keys.replaced) {
+            const foundRow = _.find(worksheetJSON, (row) => row.__EMPTY == key);
+            foundRow[newProductName] = resourcesJSON[key];
+        }
+
+        // added
+        for(const key of keys.added) {
+            const addedRow = _.zipObject(_.keys(worksheetJSON[0]), []);
+            addedRow.__EMPTY = key;
+            addedRow[newProductName] = resourcesJSON[key];
+
+            worksheetJSON.push(addedRow);
+        }
+
+        // missed
+        const allMissed = _.difference(keysXLS, keysJSON);
+        const removed = _.difference(allMissed, keys.missed);
+        worksheetJSON = _.filter(worksheetJSON, (row) => _.indexOf(removed, row.__EMPTY) === -1);
+
+        for (const key of keys.missed) {
+            const foundRow = _.find(worksheetJSON, (row) => row.__EMPTY == key);
+            foundRow[newProductName] = foundRow[product];
+        }
+
+        const data = [];
+        const products = _.filter(_.keys(worksheetJSON[0]), (key) => key !== '__EMPTY');
+
+        data.push([
+            undefined,
+            ...products
+        ]);
+
+        for (const row of worksheetJSON) {
+            data.push([
+                row['__EMPTY'],
+                ..._.map(products, (product) => row[product])
+            ]);
+        }
 
         const worksheetNew = XLSX.utils.aoa_to_sheet(data);
         const workbookNew = XLSX.utils.book_new();

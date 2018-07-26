@@ -99,14 +99,56 @@ class AdapterXLS2JSON extends BaseAdapterXLS implements IAdapter {
 
         // missed
         const allMissed = _.difference(keysJSON, keysXLS);
-        for(const key of allMissed) {
-            const removed = _.difference(allMissed, keys.missed);
-            resourcesJSON = _.omit(resourcesJSON, removed);
-        }
+        const removed = _.difference(allMissed, keys.missed);
+        resourcesJSON = _.omit(resourcesJSON, removed);
 
         const contentFile = JSON.stringify(resourcesJSON, null, COUNT_SPACES_INDENT_JSON);
 
         fs.writeFileSync(this.options.targetFile, contentFile, {encoding: 'utf8'});
+
+        return true;
+    }
+
+    takeOut(keys: any, fileName: string) {
+        const workbook = XLSX.readFile(this.options.sourceFile);
+        const worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        const worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+
+        const product = this.options.products[0];
+        const resourcesXLS = _.reduce(worksheetJSON, (resources, current: any) => {
+            resources[current.__EMPTY] = current[product];
+
+            return resources;
+        }, {});
+        const keysXLS = _.keys(resourcesXLS);
+
+        let resourcesJSON = JSON.parse(fs.readFileSync(this.options.targetFile, { encoding: 'utf8'}));
+        const keysJSON = _.keys(resourcesJSON);
+
+        let newJSON = {};
+
+        // replaced
+        for (const key of keys.replaced) {
+            newJSON[key] = resourcesXLS[key];
+        }
+
+        // added
+        for(const key of keys.added) {
+            newJSON[key] = resourcesXLS[key];
+        }
+
+        // missed
+        const allMissed = _.difference(keysJSON, keysXLS);
+        const removed = _.difference(allMissed, keys.missed);
+        resourcesJSON = _.omit(resourcesJSON, removed);
+
+        for(const key of keys.missed) {
+            newJSON[key] = resourcesJSON[key];
+        }
+
+        const contentFile = JSON.stringify(newJSON, null, COUNT_SPACES_INDENT_JSON);
+
+        fs.writeFileSync(fileName, contentFile, {encoding: 'utf8'});
 
         return true;
     }

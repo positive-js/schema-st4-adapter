@@ -97,13 +97,45 @@ var AdapterXLS2JSON = /** @class */ (function (_super) {
         }
         // missed
         var allMissed = _.difference(keysJSON, keysXLS);
-        for (var _d = 0, allMissed_1 = allMissed; _d < allMissed_1.length; _d++) {
-            var key = allMissed_1[_d];
-            var removed = _.difference(allMissed, keys.missed);
-            resourcesJSON = _.omit(resourcesJSON, removed);
-        }
+        var removed = _.difference(allMissed, keys.missed);
+        resourcesJSON = _.omit(resourcesJSON, removed);
         var contentFile = JSON.stringify(resourcesJSON, null, COUNT_SPACES_INDENT_JSON);
         fs.writeFileSync(this.options.targetFile, contentFile, { encoding: 'utf8' });
+        return true;
+    };
+    AdapterXLS2JSON.prototype.takeOut = function (keys, fileName) {
+        var workbook = XLSX.readFile(this.options.sourceFile);
+        var worksheetXLSX = workbook.Sheets[workbook.SheetNames[0]];
+        var worksheetJSON = XLSX.utils.sheet_to_json(worksheetXLSX);
+        var product = this.options.products[0];
+        var resourcesXLS = _.reduce(worksheetJSON, function (resources, current) {
+            resources[current.__EMPTY] = current[product];
+            return resources;
+        }, {});
+        var keysXLS = _.keys(resourcesXLS);
+        var resourcesJSON = JSON.parse(fs.readFileSync(this.options.targetFile, { encoding: 'utf8' }));
+        var keysJSON = _.keys(resourcesJSON);
+        var newJSON = {};
+        // replaced
+        for (var _i = 0, _a = keys.replaced; _i < _a.length; _i++) {
+            var key = _a[_i];
+            newJSON[key] = resourcesXLS[key];
+        }
+        // added
+        for (var _b = 0, _c = keys.added; _b < _c.length; _b++) {
+            var key = _c[_b];
+            newJSON[key] = resourcesXLS[key];
+        }
+        // missed
+        var allMissed = _.difference(keysJSON, keysXLS);
+        var removed = _.difference(allMissed, keys.missed);
+        resourcesJSON = _.omit(resourcesJSON, removed);
+        for (var _d = 0, _e = keys.missed; _d < _e.length; _d++) {
+            var key = _e[_d];
+            newJSON[key] = resourcesJSON[key];
+        }
+        var contentFile = JSON.stringify(newJSON, null, COUNT_SPACES_INDENT_JSON);
+        fs.writeFileSync(fileName, contentFile, { encoding: 'utf8' });
         return true;
     };
     return AdapterXLS2JSON;

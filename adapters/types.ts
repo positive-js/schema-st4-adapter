@@ -3,7 +3,7 @@ interface IAdapter {
 
     synchronize(keys?: any): any;
 
-    takeOut?(keys: any): any;
+    takeOut?(keys: any, newProductName: string): any;
 
     getDiffs(): any;
 

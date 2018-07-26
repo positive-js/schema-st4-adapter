@@ -1,5 +1,6 @@
 <div fxLayout="column" fxFlexFill>
     <diffs-header fxFlex="nogrow"
+                  *ngIf="data.options"
                   [sourceFile]="data.options.sourceFile"
                   [targetFile]="data.options.targetFile"
                   [showCheckbox]="false"></diffs-header>
@@ -14,13 +15,39 @@
 
             <label for="productName" class="new-product__label">Product name</label>
 
-            <input id="productName" type="text" id class="new-product__input">
+            <input id="productName" type="text" class="new-product__input" [(ngModel)]="productName">
         </div>
 
         <div fxLayout="column" fxLayoutGap="8px">
 
-            <div class="new-product__header">Adding 12 values to a new product column in Excel file</div>
+            <div class="new-product__header">Adding {{countResources}} values to a new product column in Excel file</div>
 
+            <div fxLayout
+                 fxLayoutGap="20px"
+                 fxLayoutAlign="space-between start"
+                 *ngFor="let key of data.keys.replaced">
+
+                <div fxFlex>{{data.resources.replaced.fromSource[key]}}</div>
+                <div fxFlex>{{data.resources.replaced.toTarget[key]}}</div>
+            </div>
+
+            <div fxLayout
+                 fxLayoutGap="20px"
+                 fxLayoutAlign="space-between start"
+                 *ngFor="let key of data.keys.added">
+
+                <div fxFlex>{{data.resources.added[key]}}</div>
+                <div fxFlex></div>
+            </div>
+
+            <div fxLayout
+                 fxLayoutGap="20px"
+                 fxLayoutAlign="space-between start"
+                 *ngFor="let key of data.keys.missed">
+
+                <div fxFlex>-</div>
+                <div fxFlex>{{data.resources.missed[key]}}</div>
+            </div>
 
         </div>
 
@@ -32,6 +59,7 @@
             <div fxLayout="row" fxLayoutGap="16px">
                 <button mc-button
                         color="primary"
+                        [disabled]="!canAdd"
                         (click)="add()">
                     Add
                 </button>
