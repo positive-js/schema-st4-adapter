@@ -1,10 +1,12 @@
-<div class="file-loader__container">
+<div class="file-loader__container" ondragover="return false"
+     ondragleave="return false"
+     ondragend="return false">
 
     <div class="file-loader__placeholder" *ngIf="!file">
         <div class="file-loader__title">{{header}}</div>
         <div class="file-loader__description">
-            <span class="file-loader__link" (click)="selectFile()">Select...</span>
-            <!--<span>Drag file here</span>&nbsp;<span class="file-loader__link" (click)="selectFile()">or select</span>-->
+            <!--<span class="file-loader__link" (click)="selectFile()">Select...</span>-->
+            <span>Drag file here</span>&nbsp;<span class="file-loader__link" (click)="selectFile()">or select</span>
         </div>
     </div>
 

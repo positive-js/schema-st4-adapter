@@ -19,17 +19,13 @@ import { FileTypeEnum } from '../../types';
 export class FileLoaderComponent {
     @Input()
     header: string;
-
     @Input()
     file: any;
 
-
     @Output()
     onSelectFile: EventEmitter<string> = new EventEmitter();
-
     @Output()
     onDropFile: EventEmitter<string> = new EventEmitter();
-
     @Output()
     onReset: EventEmitter<string> = new EventEmitter();
 
@@ -50,7 +46,7 @@ export class FileLoaderComponent {
 
         if (event.dataTransfer.files.length > 0) {
             const file = event.dataTransfer.files[0];
-            const extension = file.substr(file.lastIndexOf('.') + 1);
+            const extension = file.name.substr(file.name.lastIndexOf('.') + 1);
 
             if (Object.values(FileTypeEnum).includes(extension)) {
                 this.onDropFile.emit(file.path);
